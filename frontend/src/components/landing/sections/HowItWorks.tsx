@@ -85,7 +85,7 @@ export function HowItWorks() {
                   {i === 0 && (
                     <div className="mt-5 inline-flex items-center gap-2 text-xs text-muted font-mono">
                       <span className="w-1.5 h-1.5 rounded-full bg-mint" />
-                      {t("Mulai dari ±0,05 MON", "From about 0.05 MON")}
+                      {t("Mulai dari ±1 MON", "From about 1 MON")}
                     </div>
                   )}
                   {i === 1 && (

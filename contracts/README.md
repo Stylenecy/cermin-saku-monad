@@ -1,5 +1,7 @@
 # Cermin Contracts
 
+> **Monad:** this repository now deploys to Monad testnet with `bash scripts/deploy-monad.sh` (rehearse first with `bash scripts/rehearse-fork.sh`). The BNB Chain instructions below are from the Cermin port and the BNB version of Cermin Saku; the variable names still apply except the RPC (`MONAD_RPC`).
+
 Two-contract Foundry workspace for the Cermin lean architecture.
 
 | Contract | Role |

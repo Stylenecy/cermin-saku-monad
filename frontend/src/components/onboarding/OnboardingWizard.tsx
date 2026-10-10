@@ -50,12 +50,12 @@ const stepVariants = {
 
 // The vault reverts with MinDebtNotMet() when the borrow at open
 // (collateralValue * targetLTV) is under MIN_DEBT. MIN_DEBT is a deploy-time
-// setting (Mezo: 2,000 MUSD; our Monad testnet deployment: 20), so it comes from
+// setting (Mezo: 2,000 MUSD; our Monad testnet deployment: 0.01), so it comes from
 // the deployment via NEXT_PUBLIC_MIN_DEBT (wei). Checked client-side against the
 // live price so the wizard never lets a user sign a transaction doomed to revert.
 const MIN_MUSD_DEBT = Number(BigInt(process.env.NEXT_PUBLIC_MIN_DEBT || "20000000000000000000") / 10n ** 16n) / 100;
 // Kept back from the wallet balance for the open transaction's gas.
-const GAS_BUFFER_MON = 0.002;
+const GAS_BUFFER_MON = 0.1; // Monad charges the gas limit; createVault needs well under this
 
 function minDebtCheck(btcAmount: string, btcPriceUsd: number, targetLTV: number) {
   const btc = parseFloat(btcAmount || "0");
@@ -132,7 +132,7 @@ function StepDeposit({
   const amountEntered = amount > 0;
   const affordable = balanceBnb === undefined || amount + GAS_BUFFER_MON <= balanceBnb;
   const valid = amountEntered && (!priceReady || floor.meets) && affordable;
-  const presets = ["0.05", "0.10", "0.25", "0.50"];
+  const presets = ["1", "2", "5", "10"];
   const priceRp = formatIdr(state.btcPriceUsd * rate);
 
   return (

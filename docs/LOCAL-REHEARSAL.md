@@ -1,5 +1,7 @@
 # Local rehearsal (Anvil)
 
+> Historical: this rehearsal ran on 5 Oct 2026 for the BNB Chain version (prices in BNB). For Monad, `bash scripts/rehearse-fork.sh` runs the same deploy on a local fork of Monad testnet.
+
 The whole Cermin Saku loop on a local chain, with the real contracts and the real keeper. Run on 5 Oct 2026
 (numbers below are from that run; Anvil dev accounts, simulated price seeded at the Chainlink BNB/USD testnet
 value of that morning, $792.56).

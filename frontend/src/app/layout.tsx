@@ -31,10 +31,10 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: "Cermin Saku — uang saku dari MON-mu yang tahu kapan menahan diri",
   description:
-    "Kirim uang saku bulanan ke anak dari vault MON di Monad. MON-mu tetap utuh, dan kontraknya menahan pembayaran sendiri saat pasar sedang jatuh.",
+    "Kirim uang saku ke anak dari vault MON di Monad, tepat di detik jatuh temponya. MON-mu tetap utuh, dan kontraknya menahan pembayaran sendiri saat pasar sedang jatuh.",
   openGraph: {
     title: "Cermin Saku",
-    description: "Uang saku terjadwal dari MON-mu. Kontraknya menahan pembayaran sendiri saat posisi tidak aman.",
+    description: "Uang saku dari MON-mu, tepat waktu di Monad. Kontraknya menahan pembayaran sendiri saat posisi tidak aman.",
     type: "website",
   },
 };

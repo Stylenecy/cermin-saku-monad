@@ -62,6 +62,13 @@ export function FAQ() {
       ),
     },
     {
+      q: t("Kenapa di Monad?", "Why Monad?"),
+      a: t(
+        "Karena uang saku harus datang tepat waktu. Monad membuat blok kira-kira tiap 0,4 detik, jadi penjaga bisa membayar di detik jatuh temponya, dan biayanya cukup kecil untuk mengirim amplop sesering tiap menit. Kontrak menyimpan kapan tiap amplop jatuh tempo dan kapan ia dibayar, jadi ketepatan waktunya bisa dicek siapa pun di halaman demo.",
+        "Because an allowance has to arrive on time. Monad makes a block about every 0.4 seconds, so the keeper can pay at the due second, and fees are small enough to send envelopes as often as every minute. The contract stores when each envelope fell due and when it was paid, so anyone can check the punctuality on the demo page.",
+      ),
+    },
+    {
       q: t("Sudah bisa dipakai dengan uang sungguhan?", "Can I use it with real money yet?"),
       a: t(
         "Belum. Saat ini berjalan di Monad testnet dengan dolar dan harga MON tiruan, untuk uji coba. Versi mainnet butuh mitra pinjaman di Monad dan penukaran ke Rupiah.",

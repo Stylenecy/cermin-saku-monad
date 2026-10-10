@@ -6,10 +6,14 @@ Commit [`e767fde`](https://github.com/Stylenecy/cermin-saku/commit/e767fde) is t
 (source: `bcc-ukdw/seed-bnb` at `52671ce`, folder `Cermin/`; the Mezo pitch deck, Mezo logo files, a blog copy and
 three Mezo-era screenshots were left out of the import).
 
-Everything below was built by **Dex Bennett** on 5–7 October 2026, within the Indonesia Web3 Hackathon 2026 submission period.
+Everything below was built by **Dex Bennett** inside the Monad Metropolis build window (1 Sep – 13 Oct 2026), in two steps:
+
+1. **5–7 October 2026: Cermin Saku on BNB Chain**, submitted to the Indonesia Web3 Hackathon 2026 (that version stays at
+   [Stylenecy/cermin-saku](https://github.com/Stylenecy/cermin-saku)). Tables "What is new" and the commit log up to `ac9fba6`.
+2. **10–12 October 2026: Cermin Saku on Monad**, this repository. Section "Monad port" below.
 To see exactly what changed in the original files: `git diff e767fde -- contracts/src agent/src frontend/src`.
 
-## What is new
+## What is new (5–7 Oct, BNB Chain version)
 
 | Area | New | Changed from Cermin |
 |---|---|---|
@@ -18,6 +22,15 @@ To see exactly what changed in the original files: `git diff e767fde -- contract
 | Keeper | `monitors/saku.ts`, `executors/release.ts`, `scripts/demo.ts`, `abis/generated.ts`, 6 node:test cases | `index.ts` runs Saku after skim/defend; `config.ts` (SAKU_ADDRESS, hold cooldown, chain 31337); `chain.ts` (Anvil) |
 | Web | `/demo` (no-wallet demo vault), `/saku` (schedule envelopes), `/terima` (recipient view), Lens panel, on-chain passbook, Google / email sign-in (Privy, wallet created on login), ID/EN switch, Rupiah display with a labelled indicative rate, landing copy and sections rewritten for Cermin Saku (calculator, gate visual), wallet balance checks in onboarding | Cermin's own design system kept (Fraunces + Geist, paper, components, watercolour illustrations) and recoloured to blue, green and brown (`scripts/recolor-art.py`); Cermin's dashboard and onboarding translated and extended |
 | Ops | GitHub Actions CI, local Anvil rehearsal, fork rehearsal, one-command deploy + wiring (`scripts/`), BSC testnet deployment from Dex's own fresh deployer, on-chain demo run (`docs/TESTNET-DEPLOY.md`), passbook export (`agent/scripts/ledger.ts`) | The original port notes moved to `docs/upstream-*` |
+
+## Monad port (10–12 Oct)
+
+| Area | New | Changed |
+|---|---|---|
+| Contracts | Passbook in `CerminSaku` state: `Entry` (paid/held, due time, paid time, ICR, amount, price), `passbookLength`, `passbook(id, offset, limit)`; `test/saku/SakuPassbook.t.sol` (7 tests incl. a fuzz) | `release()` writes one passbook line per call; events unchanged |
+| Keeper | On-time mode (`earliestNextDue`, `msUntilNextSaku`, wake on the chain clock), `eth_sendRawTransactionSync` with measured receipt time and send + poll fallback, 3 timing tests | Monad chains (`chain.ts`), `MONAD_RPC_URL`, MON price sanity band, one Saku pass at a time |
+| Web | `useConfirmTimer` + `ConfirmedIn` (measured confirmation badge), `OnTimeCard` (punctuality from the passbook), one-minute envelope preset, "Why Monad?" FAQ, new link preview image | Monad chains, 150 ms receipt polling, passbook read from state, activity feed in 100-block windows, MON copy and example amounts |
+| Ops | `scripts/deploy-monad.sh` (Pyth MON/USD seed, sizes from balance, 10% gas padding), `rehearse-fork.sh` on a Monad fork, `docs/MONAD-DEPLOY.md` | `post-deploy.mjs` for Monad; BSC deploy script removed (history in git) |
 
 ## Commit log (newest last)
 

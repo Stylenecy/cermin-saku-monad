@@ -3,10 +3,10 @@
 A deterministic ~200-LOC service that keeps every Cermin vault healthy. No LLM,
 no indexer. Each cycle it:
 
-1. Reads the BNB/USD price (`PriceFeed.fetchPrice`) and lists vaults (`factory.allVaults`).
+1. Reads the MON/USD price (`PriceFeed.fetchPrice`) and lists vaults (`factory.allVaults`).
 2. Snapshots each vault and decides — purely from on-chain params:
    - `ICR < defendICR` → `vault.defend()` (repay debt from the vault's own Shadow)
-   - else BNB moved past `skimThresholdBps` since `lastSkimPrice` → `vault.skim()`
+   - else MON moved past `skimThresholdBps` since `lastSkimPrice` → `vault.skim()`
    - else `HOLD`
 3. Logs one decision per vault to SQLite.
 
@@ -16,8 +16,10 @@ Calls are simulated first, so a doomed `skim`/`defend` never spends gas.
 
 | Var | Example | Notes |
 |-----|---------|-------|
-| `CHAIN_ID` | `97` | BNB Chain: `97` BSC testnet (default), `56` mainnet |
-| `BSC_RPC_URL` | `https://data-seed-prebsc-1-s1.bnbchain.org:8545` | BSC RPC |
+| `CHAIN_ID` | `10143` | Monad: `10143` testnet (default), `143` mainnet, `31337` Anvil |
+| `MONAD_RPC_URL` | `https://testnet-rpc.monad.xyz` | Monad RPC (supports `eth_sendRawTransactionSync`) |
+| `SAKU_ON_TIME` | `true` | wake when the next allowance falls due (chain clock) instead of on the poll interval |
+| `SAKU_DUE_SLACK_MS` / `SAKU_RECHECK_MS` | `600` / `15000` | release this long after the due time / re-check a held payment this often |
 | `PRIVATE_KEY` | `0x…` (64 hex) | **Keeper signer.** Funds gas + triggers tx. Never commit. |
 | `CERMIN_FACTORY_ADDRESS` | `0x…` | From `contracts/script/Deploy.s.sol` output |
 | `PRICE_FEED_ADDRESS` | `0x…` | Price feed from deploy output (mock or Chainlink adapter) |
@@ -31,7 +33,7 @@ Calls are simulated first, so a doomed `skim`/`defend` never spends gas.
 
 The keeper key only signs the permissionless `skim`/`defend` — it can't move
 funds anywhere except per the vault's own logic. Fund it with a little testnet
-tBNB for gas: <https://www.bnbchain.org/en/testnet-faucet>.
+MON for gas: <https://faucet.monad.xyz>.
 
 ## Run locally
 
@@ -63,7 +65,7 @@ production `node_modules` into a slim `runner` stage that runs `node dist/index.
   `503` when a cycle has hung past `CYCLE_TIMEOUT_MS` or no cycle has succeeded
   for too long. Railway probes it automatically (`healthcheckPath` in
   `railway.json`).
-- **Gas:** the keeper warns each cycle when its BNB balance falls below
+- **Gas:** the keeper warns each cycle when its MON balance falls below
   `GAS_WARN_THRESHOLD_WEI`. A failed `defend` logs a `LIQUIDATION RISK` line with
   a consecutive-failure count.
 - **Nonce safety:** all on-chain writes funnel through a serial queue and await

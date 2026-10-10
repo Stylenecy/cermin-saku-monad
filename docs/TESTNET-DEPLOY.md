@@ -1,5 +1,7 @@
 # BSC testnet deployment (6 Oct 2026)
 
+> Historical: the BNB Chain version of Cermin Saku, deployed to BSC testnet on 6 Oct 2026 and submitted to the Indonesia Web3 Hackathon 2026. The Monad deployment is in [`MONAD-DEPLOY.md`](MONAD-DEPLOY.md).
+
 Deployed by `scripts/deploy-testnet.sh` from our own wallet `0xE2D734318ffCF581b0de67FF188964CE99343BF4` (chain 97), starting at
 block 135154187. Every transaction below has status 1. All nine contracts are source-verified on
 Sourcify with an **exact match** (creation and runtime bytecode): https://repo.sourcify.dev/97/0x8603B62b82166D68A9f76d2753bD8a15066Cb6Df
