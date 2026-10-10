@@ -1,13 +1,13 @@
 /**
- * Cermin Saku demo CLI — drives the parent side of the story on Anvil or BSC
+ * Cermin Saku demo CLI — drives the parent side of the story on Anvil or Monad
  * testnet. The keeper (src/index.ts) does the rest on its own.
  *
  *   npx tsx scripts/demo.ts <command> [--flags]
  *
- *   open      --bnb 0.1 [--preset balanced]       parent opens a vault
+ *   open      --mon 10 [--preset balanced]        parent opens a vault
  *   grant     --musd 20                            allow Saku to spend up to N MUSD
  *   schedule  --to 0x.. --musd 1.5 --period 600 --count 12 [--label "Uang saku Rara"]
- *   price     --usd 640                            move the SIMULATED price (MockPriceFeed owner)
+ *   price     --usd 0.02                           move the SIMULATED price (MockPriceFeed owner)
  *   status                                         print vault, lines and schedules
  *
  * Env: DEPLOYMENT (path to the deploy JSON), RPC_URL, CHAIN_ID,
@@ -88,7 +88,7 @@ async function vaultOf(owner: Hex): Promise<Hex> {
   return v as Hex;
 }
 
-const usd = (x: bigint) => Number(formatEther(x)).toLocaleString('en-US', { maximumFractionDigits: 2 });
+const usd = (x: bigint) => Number(formatEther(x)).toLocaleString('en-US', { maximumSignificantDigits: 6 });
 
 async function main() {
   const cmd = process.argv[2];
@@ -101,7 +101,7 @@ async function main() {
         abi: CERMIN_FACTORY_ABI,
         functionName: 'createVault',
         args: [preset, 0n, zeroAddress, zeroAddress],
-        value: parseEther(flag('bnb')),
+        value: parseEther(flag('mon')),
         chain,
         account,
       }),
@@ -154,16 +154,16 @@ async function main() {
     );
   } else if (cmd === 'fund') {
     const { account, client } = wallet('PARENT_PRIVATE_KEY');
-    await send(`send ${flag('bnb')} BNB to ${flag('to')}`, () =>
-      client.sendTransaction({ to: flag('to') as Hex, value: parseEther(flag('bnb')), chain, account }),
+    await send(`send ${flag('mon')} MON to ${flag('to')}`, () =>
+      client.sendTransaction({ to: flag('to') as Hex, value: parseEther(flag('mon')), chain, account }),
     );
   } else if (cmd === 'status') {
     const owner = (process.env['PARENT_ADDRESS'] ?? wallet('PARENT_PRIVATE_KEY').account.address) as Hex;
     const vault = await vaultOf(owner);
     const price = await pub.readContract({ address: dep.PriceFeed, abi: MOCK_PRICE_FEED_ABI, functionName: 'fetchPrice' });
     const s = await pub.readContract({ address: dep.CerminLens, abi: CERMIN_LENS_ABI, functionName: 'snapshot', args: [vault, price] });
-    console.log(`vault ${vault} · BNB $${usd(price)}`);
-    console.log(`  collateral ${formatEther(s.collateral)} BNB · debt ${usd(s.debt)} MUSD · ICR ${(Number(s.icrBps) / 100).toFixed(1)}%`);
+    console.log(`vault ${vault} · MON $${usd(price)}`);
+    console.log(`  collateral ${formatEther(s.collateral)} MON · debt ${usd(s.debt)} MUSD · ICR ${(Number(s.icrBps) / 100).toFixed(1)}%`);
     console.log(`  spendable ${usd(s.spendable)} · savings ${usd(s.savings)} MUSD`);
     console.log(
       `  lines: liquidation $${usd(s.lines.liquidationPrice)} · defend $${usd(s.lines.defendPrice)} · saku pause $${usd(s.lines.sakuPausePrice)} · skim $${usd(s.lines.skimPrice)}`,

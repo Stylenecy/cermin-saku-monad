@@ -9,7 +9,7 @@ import { executeSkim } from './executors/skim.js';
 import { executeDefend } from './executors/defend.js';
 import { executeAccrueYield } from './executors/accrueYield.js';
 import { executeRelease } from './executors/release.js';
-import { decideSaku, decodeLabel, listDueSchedules, previewStatus } from './monitors/saku.js';
+import { decideSaku, decodeLabel, earliestNextDue, listDueSchedules, msUntilNextSaku, previewStatus } from './monitors/saku.js';
 import { initDb, recordAction, lastActionAt } from './storage/actionLog.js';
 import { createMetrics, type Metrics } from './metrics.js';
 import { startHealthServer } from './health.js';
@@ -25,10 +25,10 @@ interface Deps {
 }
 
 const VAULT_CONCURRENCY = 5;
-// Sane band for the BNB price feed (1e18-scaled USD): ~$100 .. ~$10M. Outside
+// Sane band for the MON price feed (1e18-scaled USD): $0.0001 .. ~$10M. Outside
 // this the reading is garbage; skim is paused but defend (ICR-based, read from
 // the vault on-chain) still runs.
-const MIN_SANE_PRICE = 10n ** 20n;
+const MIN_SANE_PRICE = 10n ** 14n;
 const MAX_SANE_PRICE = 10n ** 25n;
 
 // Consecutive defend failures per vault — a sustained streak means a vault is
@@ -155,9 +155,18 @@ async function runYieldAccrual(deps: Deps): Promise<void> {
 
 const SAKU_MAX_PAYMENTS_PER_CYCLE = 6;
 
+// The vault loop and the on-time Saku timer can both reach runSaku; run one at a
+// time so two passes never race to release the same period.
+let sakuLock: Promise<void> = Promise.resolve();
+function runSaku(deps: Deps, price: bigint): Promise<void> {
+  const next = sakuLock.then(() => runSakuOnce(deps, price));
+  sakuLock = next.catch(() => undefined);
+  return next;
+}
+
 // Cermin Saku: pay every due allowance the vault approves at the live price.
 // Runs AFTER the vault loop, so a defend in the same cycle always comes first.
-async function runSaku(deps: Deps, price: bigint): Promise<void> {
+async function runSakuOnce(deps: Deps, price: bigint): Promise<void> {
   const { config, clients, logger, db, metrics } = deps;
   const saku = config.SAKU_ADDRESS;
   if (!saku) return;
@@ -190,8 +199,17 @@ async function runSaku(deps: Deps, price: bigint): Promise<void> {
         const res = await executeRelease(clients.publicClient, clients.walletClient, saku, schedule.id);
         metrics.txSubmitted += 1;
         const action = res.outcome === 'paid' ? 'SAKU_PAID' : 'SAKU_HELD';
-        logger.info({ ...ctx, txHash: res.hash, outcome: res.outcome }, `saku: allowance ${res.outcome}`);
-        recordAction(db, { vault: key as `0x${string}`, action, reason: decision.reason, txHash: res.hash, timestamp: Date.now() });
+        logger.info(
+          { ...ctx, txHash: res.hash, outcome: res.outcome, confirmMs: res.confirmMs, via: res.via },
+          `saku: allowance ${res.outcome}, receipt in ${res.confirmMs} ms (${res.via})`,
+        );
+        recordAction(db, {
+          vault: key as `0x${string}`,
+          action,
+          reason: `${decision.reason} · receipt ${res.confirmMs} ms (${res.via})`,
+          txHash: res.hash,
+          timestamp: Date.now(),
+        });
         if (res.outcome !== 'paid') break;
       }
     } catch (err) {
@@ -241,10 +259,10 @@ async function runCycle(deps: Deps, seq: number): Promise<void> {
     if (!priceSane) {
       logger.warn(
         { price: price.toString() },
-        'BNB price feed out of sane band — pausing skim this cycle (defend still active)',
+        'MON price feed out of sane band — pausing skim this cycle (defend still active)',
       );
     }
-    logger.info({ btcUsd: (Number(price) / 1e18).toFixed(0), vaults: vaults.length, priceSane }, 'cycle start');
+    logger.info({ monUsd: (Number(price) / 1e18).toFixed(5), vaults: vaults.length, priceSane }, 'cycle start');
     if (active()) metrics.vaultsSeen = vaults.length;
 
     await runYieldAccrual(deps);
@@ -316,7 +334,7 @@ async function main(): Promise<void> {
     logger,
   );
 
-  logger.info({ rpc: config.BSC_RPC_URL, chainId: config.CHAIN_ID, intervalMs: config.POLL_INTERVAL_MS }, 'Cermin agent starting');
+  logger.info({ rpc: config.MONAD_RPC_URL, chainId: config.CHAIN_ID, intervalMs: config.POLL_INTERVAL_MS }, 'Cermin agent starting');
 
   let running = false;
   let stopped = false;
@@ -341,11 +359,40 @@ async function main(): Promise<void> {
   await tick();
   const handle = setInterval(tick, config.POLL_INTERVAL_MS);
 
+  // Saku on time: instead of waiting up to POLL_INTERVAL_MS for the next cycle,
+  // sleep until the next allowance falls due (on the chain's clock) and release
+  // it in the first blocks where it is payable. Defend stays on the main cycle.
+  let sakuTimer: ReturnType<typeof setTimeout> | undefined;
+  const sakuTick = async (): Promise<void> => {
+    if (stopped || !config.SAKU_ADDRESS) return;
+    let wait = config.SAKU_RECHECK_MS;
+    try {
+      const { price } = await fetchPriceAndVaults(clients.publicClient, config);
+      await runSaku(deps, price);
+      const [nextDue, block] = await Promise.all([
+        earliestNextDue(clients.publicClient, config.SAKU_ADDRESS),
+        withRetry(() => clients.publicClient.getBlock()),
+      ]);
+      const chainOffsetMs = Number(block.timestamp) * 1000 - Date.now();
+      wait = msUntilNextSaku(nextDue, Date.now(), chainOffsetMs, {
+        slackMs: config.SAKU_DUE_SLACK_MS,
+        recheckMs: config.SAKU_RECHECK_MS,
+        idleMs: config.POLL_INTERVAL_MS,
+      });
+      logger.debug({ nextDue: nextDue?.toString(), waitMs: wait }, 'saku: next check');
+    } catch (err) {
+      logger.error({ err }, 'saku timer error');
+    }
+    if (!stopped) sakuTimer = setTimeout(() => void sakuTick(), wait);
+  };
+  if (config.SAKU_ON_TIME) void sakuTick();
+
   const shutdown = (signal: string): void => {
     if (stopped) return;
     stopped = true;
     logger.info({ signal }, 'shutting down');
     clearInterval(handle);
+    if (sakuTimer) clearTimeout(sakuTimer);
     healthServer.close();
     db.close();
     // Give in-flight tx a brief grace period before exit.

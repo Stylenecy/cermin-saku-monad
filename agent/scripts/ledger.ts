@@ -1,9 +1,11 @@
 /**
  * Print a vault's on-chain passbook as JSON: every Saku payment, hold, schedule
  * change, and the vault's own defend/skim, plus the simulated price moves, read
- * straight from event logs. Read-only, no key needed.
+ * straight from event logs. Read-only, no key needed. Monad's public RPC serves
+ * logs 100 blocks at a time, so this walks the range in 100-block windows
+ * (fine for an evidence export; the web app reads the passbook from state).
  *
- *   DEPLOYMENT=../contracts/deployments/bsc-testnet.json RPC_URL=… npx tsx scripts/ledger.ts [vault]
+ *   DEPLOYMENT=../contracts/deployments/monad-testnet.json RPC_URL=… npx tsx scripts/ledger.ts [vault]
  *
  * The vault defaults to the deployer's (the public demo vault).
  */
@@ -22,9 +24,9 @@ interface Deployment {
   PriceFeed: Hex;
 }
 
-const dep = JSON.parse(readFileSync(process.env['DEPLOYMENT'] ?? '../contracts/deployments/bsc-testnet.json', 'utf8')) as Deployment;
-const pub = createPublicClient({ chain: getChain(dep.chainId), transport: http(process.env['RPC_URL'] ?? 'https://bsc-testnet-rpc.publicnode.com') });
-const CHUNK = 49_999n;
+const dep = JSON.parse(readFileSync(process.env['DEPLOYMENT'] ?? '../contracts/deployments/monad-testnet.json', 'utf8')) as Deployment;
+const pub = createPublicClient({ chain: getChain(dep.chainId), transport: http(process.env['RPC_URL'] ?? 'https://testnet-rpc.monad.xyz') });
+const CHUNK = 99n;
 
 const big = (_k: string, v: unknown) => (typeof v === 'bigint' ? v.toString() : v);
 
@@ -36,6 +38,7 @@ async function main() {
   const rows: Record<string, unknown>[] = [];
   for (let from = BigInt(dep.deployBlock); from <= latest; from += CHUNK + 1n) {
     const to = from + CHUNK > latest ? latest : from + CHUNK;
+    if (Number(from - BigInt(dep.deployBlock)) % 5_000 < 100) console.error(`… block ${from}`);
     const [saku, v, price] = await Promise.all([
       pub.getContractEvents({ address: dep.CerminSaku, abi: CERMIN_SAKU_ABI, fromBlock: from, toBlock: to }),
       pub.getContractEvents({ address: vault, abi: CERMIN_VAULT_V11_ABI, fromBlock: from, toBlock: to }),

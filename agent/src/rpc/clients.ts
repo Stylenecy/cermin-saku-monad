@@ -9,7 +9,7 @@ export interface AgentClients {
 }
 
 export function createClients(config: Config): AgentClients {
-  const transport = http(config.BSC_RPC_URL, {
+  const transport = http(config.MONAD_RPC_URL, {
     batch: { batchSize: 100, wait: 16 },
     retryCount: 0,
   });

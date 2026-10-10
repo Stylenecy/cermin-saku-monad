@@ -124,3 +124,46 @@ export function decodeLabel(label: `0x${string}`): string {
   const hex = label.slice(2).replace(/(00)+$/, '');
   return Buffer.from(hex, 'hex').toString('utf8');
 }
+
+/**
+ * Earliest `nextDueAt` (unix seconds) over schedules that still have payments
+ * left, or undefined when none do. A due time in the past means a payment is
+ * owed but was held or is waiting.
+ */
+export async function earliestNextDue(client: PublicClient, saku: `0x${string}`): Promise<bigint | undefined> {
+  const count = await withRetry(() =>
+    client.readContract({ address: saku, abi: CERMIN_SAKU_ABI, functionName: 'scheduleCount' }),
+  );
+  const ids = Array.from({ length: Number(count) }, (_, i) => BigInt(i));
+  const dues = await Promise.all(
+    ids.map(id =>
+      withRetry(() => client.readContract({ address: saku, abi: CERMIN_SAKU_ABI, functionName: 'nextDueAt', args: [id] })),
+    ),
+  );
+  let best: bigint | undefined;
+  for (const d of dues) if (d > 0n && (best === undefined || d < best)) best = d;
+  return best;
+}
+
+/**
+ * How long the keeper sleeps before the next Saku check.
+ *
+ * - Next payment in the future: wake `slackMs` after it falls due on the
+ *   chain's clock (`chainOffsetMs` = chain time − local time), so the release
+ *   lands in the first blocks where it is payable.
+ * - Already due (held, or waiting for a safe price): re-check every `recheckMs`.
+ * - Nothing scheduled: `idleMs`.
+ * Always capped at `idleMs`, so a schedule created meanwhile is picked up.
+ */
+export function msUntilNextSaku(
+  nextDue: bigint | undefined,
+  nowMs: number,
+  chainOffsetMs: number,
+  opts: { slackMs: number; recheckMs: number; idleMs: number },
+): number {
+  if (nextDue === undefined) return opts.idleMs;
+  const dueLocalMs = Number(nextDue) * 1000 - chainOffsetMs;
+  const wait = dueLocalMs - nowMs;
+  if (wait <= 0) return Math.min(opts.recheckMs, opts.idleMs);
+  return Math.min(wait + opts.slackMs, opts.idleMs);
+}

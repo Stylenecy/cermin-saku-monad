@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { decideSaku, decodeLabel, SAKU_STATUS, statusReason } from './saku.js';
+import { decideSaku, decodeLabel, msUntilNextSaku, SAKU_STATUS, statusReason } from './saku.js';
 
 const MIN = 60_000;
 
@@ -37,4 +37,21 @@ test('status list matches ICerminVault.SakuStatus order', () => {
 test('bytes32 labels decode to text', () => {
   const label = ('0x' + Buffer.from('Uang saku Rara').toString('hex').padEnd(64, '0')) as `0x${string}`;
   assert.equal(decodeLabel(label), 'Uang saku Rara');
+});
+
+const OPTS = { slackMs: 600, recheckMs: 15_000, idleMs: 60_000 };
+
+test('wakes just after the next payment falls due on the chain clock', () => {
+  // due at t=100 s; local clock at 95 s; chain clock runs 1 s ahead of local
+  const ms = msUntilNextSaku(100n, 95_000, 1_000, OPTS);
+  assert.equal(ms, 4_000 + 600);
+});
+
+test('an owed-but-held payment is re-checked, not hammered', () => {
+  assert.equal(msUntilNextSaku(50n, 95_000, 0, OPTS), 15_000);
+});
+
+test('nothing scheduled, or far away: sleep at most the idle interval', () => {
+  assert.equal(msUntilNextSaku(undefined, 0, 0, OPTS), 60_000);
+  assert.equal(msUntilNextSaku(10_000n, 0, 0, OPTS), 60_000);
 });
