@@ -54,7 +54,15 @@ async function main() {
   const times = new Map<bigint, number>();
   for (const b of new Set(rows.map((r) => r['block'] as bigint))) times.set(b, Number((await pub.getBlock({ blockNumber: b })).timestamp));
   for (const r of rows) r['time'] = times.get(r['block'] as bigint);
-  console.log(JSON.stringify({ chainId: dep.chainId, vault, readAtBlock: latest, rows }, big, 2));
+  // The passbook as stored in CerminSaku's state (paid and held lines, with due and paid times).
+  const ids = (await pub.readContract({ address: dep.CerminSaku, abi: CERMIN_SAKU_ABI, functionName: 'schedulesOfVault', args: [vault] })) as readonly bigint[];
+  const passbook: Record<string, unknown>[] = [];
+  for (const id of ids) {
+    const len = await pub.readContract({ address: dep.CerminSaku, abi: CERMIN_SAKU_ABI, functionName: 'passbookLength', args: [id] });
+    const lines = await pub.readContract({ address: dep.CerminSaku, abi: CERMIN_SAKU_ABI, functionName: 'passbook', args: [id, 0n, len] });
+    for (const l of lines) passbook.push({ schedule: id, ...l });
+  }
+  console.log(JSON.stringify({ chainId: dep.chainId, vault, readAtBlock: latest, rows, passbook }, big, 2));
 }
 
 main().catch((e) => {
