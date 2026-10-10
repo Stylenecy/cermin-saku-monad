@@ -21,7 +21,11 @@ import {IPriceFeed} from "./interfaces/mezo/IPriceFeed.sol";
 ///         gates itself, so even a buggy Saku cannot drain an unsafe vault.
 ///
 ///         Saku never holds funds: the vault pays the recipient directly, out
-///         of the spendable bucket only. Collateral (BNB) is never touched.
+///         of the spendable bucket only. Collateral (MON) is never touched.
+///
+///         Every release, paid or held, also writes one line to the schedule's
+///         passbook in contract state (see `Entry`), so the whole history reads
+///         back in one call without an event indexer.
 contract CerminSaku is ReentrancyGuard {
     /// @notice Shortest allowed period. One minute keeps demos possible;
     ///         production schedules are monthly.
@@ -41,11 +45,28 @@ contract CerminSaku is ReentrancyGuard {
         bytes32 label; // short UI label, e.g. "Uang saku Rara"
     }
 
+    /// @notice One passbook line: a payment, or a hold with its reason.
+    /// @dev    Monad's public RPC serves eth_getLogs 100 blocks (~40 s) at a
+    ///         time, so rebuilding weeks of history from events takes tens of
+    ///         thousands of calls. Two storage slots per line make the history
+    ///         a single eth_call instead, and `dueAt` next to `at` shows how
+    ///         long after its due time each payment actually landed.
+    struct Entry {
+        uint64 at; // block timestamp of the release
+        uint64 dueAt; // when the period paid (or held) was due
+        uint32 paymentNo; // 1-based payment number; 0 for a hold
+        ICerminVault.SakuStatus status; // Ok = paid, otherwise why it was held
+        uint32 icrBps; // vault ICR at that moment, capped at type(uint32).max
+        uint128 amount; // MUSD (18 decimals)
+        uint128 price; // collateral price used for the check (18 decimals)
+    }
+
     ICerminFactory public immutable FACTORY;
 
     Schedule[] private _schedules;
     mapping(address vault => uint256[] ids) private _byVault;
     mapping(address recipient => uint256[] ids) private _byRecipient;
+    mapping(uint256 id => Entry[]) private _passbook;
 
     event ScheduleCreated(
         uint256 indexed id,
@@ -147,16 +168,41 @@ contract CerminSaku is ReentrancyGuard {
         ICerminVault vault = ICerminVault(s.vault);
         uint256 price = IPriceFeed(_priceFeed(s.vault)).fetchPrice();
         (ICerminVault.SakuStatus status, uint256 icrBps,,) = vault.sakuStatus(address(this), s.amount, price);
+        uint64 dueAt = s.start + uint64(s.paid) * s.period;
         if (status != ICerminVault.SakuStatus.Ok) {
+            _record(id, dueAt, 0, status, icrBps, s.amount, price);
             emit AllowanceHeld(id, s.vault, status, icrBps, price);
             return false;
         }
 
         uint32 paymentNo = s.paid + 1;
         s.paid = paymentNo;
+        _record(id, dueAt, paymentNo, status, icrBps, s.amount, price);
         vault.withdrawSpendableFor(s.amount, s.recipient);
         emit AllowancePaid(id, s.vault, s.recipient, s.amount, paymentNo, icrBps);
         return true;
+    }
+
+    function _record(
+        uint256 id,
+        uint64 dueAt,
+        uint32 paymentNo,
+        ICerminVault.SakuStatus status,
+        uint256 icrBps,
+        uint128 amount,
+        uint256 price
+    ) private {
+        _passbook[id].push(
+            Entry({
+                at: uint64(block.timestamp),
+                dueAt: dueAt,
+                paymentNo: paymentNo,
+                status: status,
+                icrBps: icrBps > type(uint32).max ? type(uint32).max : uint32(icrBps),
+                amount: amount,
+                price: price > type(uint128).max ? type(uint128).max : uint128(price)
+            })
+        );
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -177,6 +223,23 @@ contract CerminSaku is ReentrancyGuard {
 
     function schedulesOfRecipient(address recipient) external view returns (uint256[] memory) {
         return _byRecipient[recipient];
+    }
+
+    function passbookLength(uint256 id) external view returns (uint256) {
+        _get(id);
+        return _passbook[id].length;
+    }
+
+    /// @notice Passbook lines `offset`..`offset + limit` of a schedule, oldest first.
+    function passbook(uint256 id, uint256 offset, uint256 limit) external view returns (Entry[] memory out) {
+        _get(id);
+        Entry[] storage book = _passbook[id];
+        if (offset >= book.length) return out;
+        uint256 end = offset + limit > book.length ? book.length : offset + limit;
+        out = new Entry[](end - offset);
+        for (uint256 i = offset; i < end; ++i) {
+            out[i - offset] = book[i];
+        }
     }
 
     /// @notice Number of payments due now (owed and not yet paid).
