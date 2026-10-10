@@ -36,7 +36,7 @@ export const STATUS_TEXT: Record<SakuStatusName, { id: string; en: string; tone:
     tone: "held",
   },
   ReserveTooThin: {
-    id: "Ditahan — cadangan tidak akan cukup bila BNB jatuh lagi",
+    id: "Ditahan — cadangan tidak akan cukup bila MON jatuh lagi",
     en: "Held — the reserve would not survive another drop",
     tone: "held",
   },
@@ -47,6 +47,7 @@ export function statusName(code: number): SakuStatusName {
 }
 
 export const PERIOD_PRESETS = [
+  { seconds: 60, id: "Tiap menit (demo)", en: "Every minute (demo)" },
   { seconds: 120, id: "2 menit (demo)", en: "2 min (demo)" },
   { seconds: 600, id: "10 menit (demo)", en: "10 min (demo)" },
   { seconds: 86_400, id: "Harian", en: "Daily" },

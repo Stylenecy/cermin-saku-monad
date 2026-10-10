@@ -20,6 +20,8 @@ import { formatUsd, formatTxError } from "@/lib/utils";
 import { formatIdr, formatNum, useUsdIdr } from "@/lib/idr";
 import { useLang } from "@/lib/i18n";
 import { EXPLORER_URL, activeChain } from "@/lib/chains";
+import { useConfirmTimer } from "@/hooks/useConfirmTimer";
+import { ConfirmedIn } from "@/components/saku/ConfirmedIn";
 import {
   Coins,
   Target,
@@ -48,12 +50,12 @@ const stepVariants = {
 
 // The vault reverts with MinDebtNotMet() when the borrow at open
 // (collateralValue * targetLTV) is under MIN_DEBT. MIN_DEBT is a deploy-time
-// setting (Mezo: 2,000 MUSD; our BSC testnet deployment: 20), so it comes from
+// setting (Mezo: 2,000 MUSD; our Monad testnet deployment: 20), so it comes from
 // the deployment via NEXT_PUBLIC_MIN_DEBT (wei). Checked client-side against the
 // live price so the wizard never lets a user sign a transaction doomed to revert.
 const MIN_MUSD_DEBT = Number(BigInt(process.env.NEXT_PUBLIC_MIN_DEBT || "20000000000000000000") / 10n ** 16n) / 100;
 // Kept back from the wallet balance for the open transaction's gas.
-const GAS_BUFFER_BNB = 0.002;
+const GAS_BUFFER_MON = 0.002;
 
 function minDebtCheck(btcAmount: string, btcPriceUsd: number, targetLTV: number) {
   const btc = parseFloat(btcAmount || "0");
@@ -128,7 +130,7 @@ function StepDeposit({
   const conservativeMin = minDebtCheck("0", state.btcPriceUsd, PRESETS.conservative.targetLTV).minBtc;
   const amount = parseFloat(state.btcAmount || "0");
   const amountEntered = amount > 0;
-  const affordable = balanceBnb === undefined || amount + GAS_BUFFER_BNB <= balanceBnb;
+  const affordable = balanceBnb === undefined || amount + GAS_BUFFER_MON <= balanceBnb;
   const valid = amountEntered && (!priceReady || floor.meets) && affordable;
   const presets = ["0.05", "0.10", "0.25", "0.50"];
   const priceRp = formatIdr(state.btcPriceUsd * rate);
@@ -141,13 +143,13 @@ function StepDeposit({
           {t("Langkah 1", "Step 1")}
         </Badge>
         <h2 className="font-serif text-3xl font-medium tracking-[-0.02em] text-ink leading-tight">
-          {t("Berapa BNB yang mau kamu ", "How much BNB do you want to ")}
+          {t("Berapa MON yang mau kamu ", "How much MON do you want to ")}
           <em className="italic font-normal">{t("taruh di vault", "vault")}</em>?
         </h2>
         <p className="text-muted text-sm mt-2">
           {t(
-            "BNB-mu tetap utuh dan terkunci. Yang dipakai hanya dolar (MUSD) hasil pinjaman.",
-            "Your BNB stays locked. Only the borrowed dollars get spent.",
+            "MON-mu tetap utuh dan terkunci. Yang dipakai hanya dolar (MUSD) hasil pinjaman.",
+            "Your MON stays locked. Only the borrowed dollars get spent.",
           )}
         </p>
       </div>
@@ -160,8 +162,8 @@ function StepDeposit({
         step="0.001"
         value={state.btcAmount}
         onChange={(e) => onChange({ btcAmount: e.target.value })}
-        suffix="BNB"
-        aria-label={t("Jumlah BNB yang disetor", "Amount of BNB to deposit")}
+        suffix="MON"
+        aria-label={t("Jumlah MON yang disetor", "Amount of MON to deposit")}
       />
 
       {usdValue > 0 ? (
@@ -171,7 +173,7 @@ function StepDeposit({
         </p>
       ) : (
         <p className="text-sm text-muted text-right -mt-3">
-          BNB ≈ {formatIdr(state.btcPriceUsd * rate)}
+          MON ≈ {formatIdr(state.btcPriceUsd * rate)}
           <UsdNote usd={state.btcPriceUsd} decimals={0} /> · {t("harga simulasi", "simulated price")}
         </p>
       )}
@@ -196,7 +198,7 @@ function StepDeposit({
       <div className="flex items-center justify-between rounded-2xl border border-cream-300 bg-surface px-4 py-3 text-sm -mt-2">
         <span className="text-muted">{t("Saldo dompetmu", "Your wallet balance")}</span>
         <span className="font-medium tabular-nums text-ink">
-          {balanceBnb === undefined ? "…" : `${formatNum(balanceBnb, lang, 4)} tBNB`}
+          {balanceBnb === undefined ? "…" : `${formatNum(balanceBnb, lang, 4)} MON`}
         </span>
       </div>
 
@@ -204,8 +206,8 @@ function StepDeposit({
         <div className="text-sm -mt-3 space-y-2">
           <p className="text-danger">
             {t("Saldo belum cukup untuk setoran ini plus biaya gas. ", "Not enough balance for this deposit plus gas. ")}
-            <a href="https://www.bnbchain.org/en/testnet-faucet" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
-              {t("Ambil tBNB gratis di faucet ↗", "Get free tBNB from the faucet ↗")}
+            <a href="https://faucet.monad.xyz" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
+              {t("Ambil MON gratis di faucet ↗", "Get free MON from the faucet ↗")}
             </a>
           </p>
           {address && (
@@ -215,7 +217,7 @@ function StepDeposit({
               className="flex w-full items-center justify-between gap-3 rounded-2xl border border-cream-300 bg-surface px-4 py-2.5 text-left hover:border-amber-200"
             >
               <span className="min-w-0">
-                <span className="block text-xs text-muted">{t("Kirim tBNB ke alamat dompetmu ini", "Send tBNB to this wallet address")}</span>
+                <span className="block text-xs text-muted">{t("Kirim MON ke alamat dompetmu ini", "Send MON to this wallet address")}</span>
                 <span className="block truncate font-mono text-xs text-ink">{address}</span>
               </span>
               <span className="shrink-0 text-xs font-medium text-amber-600">{t("Salin", "Copy")}</span>
@@ -226,17 +228,17 @@ function StepDeposit({
       {amountEntered && affordable && priceReady && !floor.meets && (
         <p className="text-sm text-amber-700 -mt-3">
           {t("Terlalu kecil untuk membuka vault. Minimal", "Too small to open a vault. At least")}{" "}
-          <span className="font-medium">{formatNum(floor.minBtc, lang, 4)} BNB</span>.
+          <span className="font-medium">{formatNum(floor.minBtc, lang, 4)} MON</span>.
         </p>
       )}
 
       <p className="text-xs text-muted-2 -mt-2">
         {priceReady
           ? t(
-              `Profil ${RISK_LABELS.balanced.id} mulai dari ${formatNum(balancedMin, lang, 3)} BNB · ${RISK_LABELS.conservative.id} ${formatNum(conservativeMin, lang, 3)} BNB · 1 BNB = ${priceRp} (testnet)`,
-              `${RISK_LABELS.balanced.en} starts at ${formatNum(balancedMin, lang, 3)} BNB · ${RISK_LABELS.conservative.en} ${formatNum(conservativeMin, lang, 3)} BNB · 1 BNB = ${priceRp} (testnet)`,
+              `Profil ${RISK_LABELS.balanced.id} mulai dari ${formatNum(balancedMin, lang, 3)} MON · ${RISK_LABELS.conservative.id} ${formatNum(conservativeMin, lang, 3)} MON · 1 MON = ${priceRp} (testnet)`,
+              `${RISK_LABELS.balanced.en} starts at ${formatNum(balancedMin, lang, 3)} MON · ${RISK_LABELS.conservative.en} ${formatNum(conservativeMin, lang, 3)} MON · 1 MON = ${priceRp} (testnet)`,
             )
-          : t("Mengambil harga BNB…", "Fetching the BNB price…")}
+          : t("Mengambil harga MON…", "Fetching the MON price…")}
       </p>
 
       <Button variant="primary" size="xl" className="w-full" onClick={onNext} disabled={!valid}>
@@ -346,8 +348,8 @@ function StepRisk({
       ltv: "40% LTV",
       drop: t("tahan turun ~58%", "~58% drop tolerance"),
       desc: t(
-        "Hasil lebih kecil, perlindungan paling tinggi. Cocok untuk pemegang BNB yang setia.",
-        "Lower yield, maximum protection. Perfect for BNB maxis.",
+        "Hasil lebih kecil, perlindungan paling tinggi. Cocok untuk pemegang MON yang setia.",
+        "Lower yield, maximum protection. Perfect for MON maxis.",
       ),
     },
     {
@@ -437,8 +439,8 @@ function StepRisk({
               </p>
               {!affordable && (
                 <p className="text-xs text-amber-700 mt-2">
-                  {t("Butuh", "Needs")} ≥ {check.minBtc.toFixed(4)} BNB.{" "}
-                  {t("Kamu baru memasukkan", "You entered")} {state.btcAmount || "0"} BNB.{" "}
+                  {t("Butuh", "Needs")} ≥ {check.minBtc.toFixed(4)} MON.{" "}
+                  {t("Kamu baru memasukkan", "You entered")} {state.btcAmount || "0"} MON.{" "}
                   {t("Kembali dan setor lebih banyak.", "Go back to deposit more.")}
                 </p>
               )}
@@ -493,8 +495,8 @@ function StepPreview({
         </h2>
         <p className="text-muted text-sm mt-2">
           {t(
-            `Perkiraan penghasilan dari ${btcNum.toFixed(4)} BNB. Shadow = saldo pakai + tabungan.`,
-            `Estimated income from ${btcNum.toFixed(4)} BNB.`,
+            `Perkiraan penghasilan dari ${btcNum.toFixed(4)} MON. Shadow = saldo pakai + tabungan.`,
+            `Estimated income from ${btcNum.toFixed(4)} MON.`,
           )}
         </p>
       </div>
@@ -561,10 +563,10 @@ function StepPreview({
           </p>
           <p className="text-xs text-amber-700 leading-relaxed">
             {t(
-              `Di harga ${rp(state.btcPriceUsd)}/BNB (${formatUsd(state.btcPriceUsd, 0)}) dan LTV ${params.targetLTV / 100}%, ${btcNum.toFixed(4)} BNB hanya bisa meminjam ~${rp(debt.borrow)} (~${debt.borrow.toFixed(0)} MUSD), di bawah minimum 2.000 MUSD. Setor minimal`,
-              `At ${rp(state.btcPriceUsd)}/BNB (${formatUsd(state.btcPriceUsd, 0)}) and ${params.targetLTV / 100}% LTV, ${btcNum.toFixed(4)} BNB borrows only ~${rp(debt.borrow)} (~${debt.borrow.toFixed(0)} MUSD) — under the 2,000 MUSD minimum. Deposit at least`,
+              `Di harga ${rp(state.btcPriceUsd)}/MON (${formatUsd(state.btcPriceUsd, 0)}) dan LTV ${params.targetLTV / 100}%, ${btcNum.toFixed(4)} MON hanya bisa meminjam ~${rp(debt.borrow)} (~${debt.borrow.toFixed(0)} MUSD), di bawah minimum 2.000 MUSD. Setor minimal`,
+              `At ${rp(state.btcPriceUsd)}/MON (${formatUsd(state.btcPriceUsd, 0)}) and ${params.targetLTV / 100}% LTV, ${btcNum.toFixed(4)} MON borrows only ~${rp(debt.borrow)} (~${debt.borrow.toFixed(0)} MUSD) — under the 2,000 MUSD minimum. Deposit at least`,
             )}{" "}
-            <span className="font-medium">{debt.minBtc.toFixed(4)} BNB</span>
+            <span className="font-medium">{debt.minBtc.toFixed(4)} MON</span>
             {t(", atau pilih strategi dengan LTV lebih tinggi.", ", or pick a higher-LTV strategy.")}
           </p>
         </div>
@@ -619,6 +621,7 @@ function StepConfirm({
     isLoading: isConfirming,
     isSuccess: receiptReady,
   } = useWaitForTransactionReceipt({ hash: txHash });
+  const confirmMs = useConfirmTimer(txHash, receiptReady);
   const [opening, setOpening] = useState(false);
 
   // A fetched receipt is not the same as a successful transaction: a reverted
@@ -668,17 +671,18 @@ function StepConfirm({
           </h2>
           <p className="text-muted text-sm mt-2 max-w-sm mx-auto">
             {t(
-              "Vault Cermin-mu sudah aktif di BSC testnet. Shadow sudah jalan dan keeper ikut mengawasi.",
-              "Your Cermin vault is live on BSC testnet. The Shadow is active and the keeper bot is watching.",
+              "Vault Cermin-mu sudah aktif di Monad testnet. Shadow sudah jalan dan keeper ikut mengawasi.",
+              "Your Cermin vault is live on Monad testnet. The Shadow is active and the keeper bot is watching.",
             )}
           </p>
         </div>
+        <ConfirmedIn ms={confirmMs} />
         {txHash && (
           <a
             href={`${EXPLORER_URL}/tx/${txHash}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block text-sm text-amber-600 hover:text-amber-700"
+            className="block text-sm text-amber-600 hover:text-amber-700"
           >
             {t("Lihat transaksi ↗", "View transaction ↗")}
           </a>
@@ -712,14 +716,14 @@ function StepConfirm({
 
       <Card variant="soft" className="!p-0 overflow-hidden">
         <div className="divide-y divide-line">
-          <Field label={t("Setor", "Depositing")} value={`${state.btcAmount} BNB`} />
+          <Field label={t("Setor", "Depositing")} value={`${state.btcAmount} MON`} />
           <Field
             label={t("Strategi", "Strategy")}
             value={`${GOAL_LABELS[state.goal ?? "forever"].badge[lang]} · ${state.risk ? RISK_LABELS[state.risk][lang] : ""}`}
           />
           <Field label={t("Jaringan", "Network")} value={activeChain.name} />
           <Field
-            label={t("BNB-mu", "BNB stays")}
+            label={t("MON-mu", "MON stays")}
             value={t("Tetap utuh · tidak dijual", "Locked · Never sold")}
             valueClass="text-success"
           />
@@ -765,10 +769,10 @@ function StepConfirm({
           </p>
           <p className="text-xs text-amber-700 leading-relaxed">
             {t(
-              `${state.btcAmount || "0"} BNB di harga ${formatIdr(state.btcPriceUsd * rate)}/BNB (${formatUsd(state.btcPriceUsd, 0)}) dengan LTV ${params.targetLTV / 100}% hanya meminjam ~${formatIdr(debt.borrow * rate)} (~${debt.borrow.toFixed(0)} MUSD). Kembali dan setor minimal`,
-              `${state.btcAmount || "0"} BNB at ${formatIdr(state.btcPriceUsd * rate)}/BNB (${formatUsd(state.btcPriceUsd, 0)}) and ${params.targetLTV / 100}% LTV borrows only ~${formatIdr(debt.borrow * rate)} (~${debt.borrow.toFixed(0)} MUSD). Go back and deposit at least`,
+              `${state.btcAmount || "0"} MON di harga ${formatIdr(state.btcPriceUsd * rate)}/MON (${formatUsd(state.btcPriceUsd, 0)}) dengan LTV ${params.targetLTV / 100}% hanya meminjam ~${formatIdr(debt.borrow * rate)} (~${debt.borrow.toFixed(0)} MUSD). Kembali dan setor minimal`,
+              `${state.btcAmount || "0"} MON at ${formatIdr(state.btcPriceUsd * rate)}/MON (${formatUsd(state.btcPriceUsd, 0)}) and ${params.targetLTV / 100}% LTV borrows only ~${formatIdr(debt.borrow * rate)} (~${debt.borrow.toFixed(0)} MUSD). Go back and deposit at least`,
             )}{" "}
-            <span className="font-medium">{debt.minBtc.toFixed(4)} BNB</span>.
+            <span className="font-medium">{debt.minBtc.toFixed(4)} MON</span>.
           </p>
         </div>
       )}
@@ -831,7 +835,7 @@ export function OnboardingWizard({ btcPriceUsd, onComplete }: OnboardingWizardPr
     risk: null,
   });
 
-  // Keep the live BNB price flowing into the wizard. The price feed may resolve
+  // Keep the live MON price flowing into the wizard. The price feed may resolve
   // after mount; without this, every calculation would use the stale snapshot
   // captured at mount (often the fallback price).
   useEffect(() => {

@@ -24,7 +24,7 @@ export interface ScheduleRow {
   nextDueAt: bigint;
 }
 
-/** Live BNB/USD from the price feed (simulated MockPriceFeed on testnet). */
+/** Live MON/USD from the price feed (simulated MockPriceFeed on testnet). */
 export function useFeedPrice() {
   const enabled = CONTRACTS.PRICE_FEED !== zeroAddress;
   const { data, isLoading, isError } = useReadContract({
@@ -152,9 +152,10 @@ export type LedgerKind = "paid" | "held" | "defended" | "skimmed" | "created" | 
 
 export interface LedgerEntry {
   kind: LedgerKind;
-  blockNumber: bigint;
-  txHash: `0x${string}`;
-  logIndex: number;
+  /** Stable React key. */
+  key: string;
+  /** Only for entries read from event logs (defend, skim). */
+  txHash?: `0x${string}`;
   scheduleId?: bigint;
   amount?: bigint;
   recipient?: `0x${string}`;
@@ -164,50 +165,24 @@ export interface LedgerEntry {
   icrAfterBps?: bigint;
   price?: bigint;
   timestamp?: number;
+  /** When the period paid or held was due (passbook lines only). */
+  dueAt?: number;
 }
 
-// BSC testnet makes ~190k blocks a day, so a passbook opened weeks after the
-// deploy spans millions of blocks. Scan in the widest range the RPC accepts
-// (publicnode: 50k; fall back to 5k), a few ranges at a time, and remember
-// how far each vault has been read so a refetch only reads new blocks.
-let chunk = 49_999n;
-const SMALL_CHUNK = 4_999n;
-const WORKERS = 4;
-const ledgerCache = new Map<string, { to: bigint; entries: LedgerEntry[] }>();
-
-async function scanChunk(c: PublicClient, vault: `0x${string}`, from: bigint, to: bigint): Promise<LedgerEntry[]> {
-  try {
-    return await readChunk(c, vault, from, to);
-  } catch (e) {
-    if (to - from <= SMALL_CHUNK) throw e;
-    chunk = SMALL_CHUNK; // this RPC refuses wide ranges; stay small from now on
-    const out: LedgerEntry[] = [];
-    for (let f = from; f <= to; f += SMALL_CHUNK + 1n) {
-      out.push(...(await readChunk(c, vault, f, f + SMALL_CHUNK > to ? to : f + SMALL_CHUNK)));
-    }
-    return out;
-  }
-}
-
-async function scanRange(c: PublicClient, vault: `0x${string}`, from: bigint, to: bigint): Promise<LedgerEntry[]> {
-  const ranges: [bigint, bigint][] = [];
-  for (let f = from; f <= to; f += chunk + 1n) ranges.push([f, f + chunk > to ? to : f + chunk]);
-  const out: LedgerEntry[] = [];
-  let next = 0;
-  const worker = async () => {
-    while (next < ranges.length) {
-      const [f, t] = ranges[next++]!;
-      out.push(...(await scanChunk(c, vault, f, t)));
-    }
-  };
-  await Promise.all(Array.from({ length: Math.min(WORKERS, ranges.length) }, worker));
-  return out;
-}
+const PASSBOOK_PAGE = 200n;
+// Monad's public RPC answers eth_getLogs for at most 100 blocks per call.
+const LOG_WINDOW = 99n;
+const RECENT_BLOCKS = 1_000n;
 
 /**
- * The on-chain "passbook": every Saku payment and hold for a vault, plus the
- * vault's own defend/skim, read from event logs (no indexer), from the deploy
- * block onward.
+ * The passbook for a vault.
+ *
+ * - Saku payments and holds come from CerminSaku's passbook in contract state:
+ *   complete, one call per schedule, no indexer, however old the vault is.
+ * - The vault's own defend/skim events come from event logs, but Monad's public
+ *   RPC serves logs 100 blocks (~40 s) at a time, so only two places are read:
+ *   the blocks listed in NEXT_PUBLIC_LEDGER_BLOCKS (the demo's recorded defends)
+ *   and the last ~1,000 blocks.
  */
 export function useLedger(vault: `0x${string}` | undefined) {
   const client = usePublicClient();
@@ -215,82 +190,108 @@ export function useLedger(vault: `0x${string}` | undefined) {
   return useQuery({
     queryKey: ["saku-ledger", vault],
     enabled,
-    refetchInterval: 20_000,
+    refetchInterval: 15_000,
     queryFn: async (): Promise<LedgerEntry[]> => {
       const c = client!;
-      const key = vault!.toLowerCase();
-      const latest = await c.getBlockNumber();
-      const cached = ledgerCache.get(key);
-      const from0 = cached
-        ? cached.to + 1n
-        : SAKU.DEPLOY_BLOCK > 0n
-          ? SAKU.DEPLOY_BLOCK
-          : latest > 200_000n
-            ? latest - 200_000n
-            : 0n;
-      const fresh = from0 <= latest ? await scanRange(c, vault!, from0, latest) : [];
-      const out = [...(cached?.entries ?? []), ...fresh];
-      out.sort((x, y) => (x.blockNumber === y.blockNumber ? y.logIndex - x.logIndex : Number(y.blockNumber - x.blockNumber)));
-      // Timestamps for the newest 40 entries (one getBlock per distinct block not seen yet).
-      const blocks = [...new Set(out.slice(0, 40).filter((e) => e.timestamp === undefined).map((e) => e.blockNumber))];
-      const times = new Map<bigint, number>();
-      await Promise.all(
-        blocks.map(async (b) => {
-          const blk = await c.getBlock({ blockNumber: b });
-          times.set(b, Number(blk.timestamp));
-        }),
-      );
-      const entries = out.map((e) => (e.timestamp === undefined && times.has(e.blockNumber) ? { ...e, timestamp: times.get(e.blockNumber) } : e));
-      ledgerCache.set(key, { to: latest, entries });
-      return entries;
+      const [book, events] = await Promise.all([readPassbook(c, vault!), readVaultEvents(c, vault!)]);
+      const out = [...book, ...events];
+      // Newest first; a line without a time (a cancellation) sits on top.
+      out.sort((x, y) => (y.timestamp ?? Infinity) - (x.timestamp ?? Infinity));
+      return out;
     },
   });
 }
 
-/** One block range of Saku events for a vault plus the vault's own defend/skim. */
-async function readChunk(c: PublicClient, vault: `0x${string}`, from: bigint, to: bigint): Promise<LedgerEntry[]> {
+async function readPassbook(c: PublicClient, vault: `0x${string}`): Promise<LedgerEntry[]> {
+  const ids = (await c.readContract({
+    address: SAKU.SAKU,
+    abi: CERMIN_SAKU_ABI,
+    functionName: "schedulesOfVault",
+    args: [vault],
+  })) as readonly bigint[];
   const out: LedgerEntry[] = [];
-  const [sakuLogs, vaultLogs] = await Promise.all([
-    c.getContractEvents({ address: SAKU.SAKU, abi: CERMIN_SAKU_ABI, fromBlock: from, toBlock: to }),
-    c.getContractEvents({ address: vault, abi: CERMIN_VAULT_V11_ABI, fromBlock: from, toBlock: to }),
-  ]);
-  for (const l of sakuLogs) {
-    const a = l.args as Record<string, unknown>;
-    if (a.vault && (a.vault as string).toLowerCase() !== vault.toLowerCase()) continue;
-    const base = {
-      blockNumber: l.blockNumber!,
-      txHash: l.transactionHash!,
-      logIndex: l.logIndex!,
-      scheduleId: a.id as bigint,
-    };
-    if (l.eventName === "AllowancePaid")
+  await Promise.all(
+    ids.map(async (id) => {
+      const [s, len] = await Promise.all([
+        c.readContract({ address: SAKU.SAKU, abi: CERMIN_SAKU_ABI, functionName: "getSchedule", args: [id] }),
+        c.readContract({ address: SAKU.SAKU, abi: CERMIN_SAKU_ABI, functionName: "passbookLength", args: [id] }),
+      ]);
       out.push({
-        ...base,
-        kind: "paid",
-        amount: a.amount as bigint,
-        recipient: a.recipient as `0x${string}`,
-        paymentNo: Number(a.paymentNo),
-        icrBps: a.icrBps as bigint,
+        kind: "created",
+        key: `created-${id}`,
+        scheduleId: id,
+        amount: s.amount,
+        recipient: s.recipient,
+        timestamp: Number(s.start),
       });
-    else if (l.eventName === "AllowanceHeld")
-      out.push({ ...base, kind: "held", reason: Number(a.reason), icrBps: a.icrBps as bigint, price: a.price as bigint });
-    else if (l.eventName === "ScheduleCreated")
-      out.push({ ...base, kind: "created", amount: a.amount as bigint, recipient: a.recipient as `0x${string}` });
-    else if (l.eventName === "ScheduleCancelled") out.push({ ...base, kind: "cancelled" });
-  }
-  for (const l of vaultLogs) {
+      if (s.cancelled) out.push({ kind: "cancelled", key: `cancelled-${id}`, scheduleId: id });
+      for (let off = 0n; off < len; off += PASSBOOK_PAGE) {
+        const page = await c.readContract({
+          address: SAKU.SAKU,
+          abi: CERMIN_SAKU_ABI,
+          functionName: "passbook",
+          args: [id, off, PASSBOOK_PAGE],
+        });
+        page.forEach((e, i) => {
+          const paid = e.paymentNo > 0;
+          out.push({
+            kind: paid ? "paid" : "held",
+            key: `book-${id}-${off + BigInt(i)}`,
+            scheduleId: id,
+            amount: e.amount,
+            recipient: s.recipient,
+            paymentNo: paid ? e.paymentNo : undefined,
+            reason: paid ? undefined : Number(e.status),
+            icrBps: BigInt(e.icrBps),
+            price: e.price,
+            timestamp: Number(e.at),
+            dueAt: Number(e.dueAt),
+          });
+        });
+      }
+    }),
+  );
+  return out;
+}
+
+function ledgerHintBlocks(): bigint[] {
+  return (process.env.NEXT_PUBLIC_LEDGER_BLOCKS || "")
+    .split(",")
+    .map((b) => b.trim())
+    .filter(Boolean)
+    .map((b) => BigInt(b));
+}
+
+async function readVaultEvents(c: PublicClient, vault: `0x${string}`): Promise<LedgerEntry[]> {
+  const latest = await c.getBlockNumber();
+  const ranges: [bigint, bigint][] = ledgerHintBlocks().map((b) => [b, b]);
+  const floor = latest > RECENT_BLOCKS ? latest - RECENT_BLOCKS : 0n;
+  for (let f = floor; f <= latest; f += LOG_WINDOW + 1n) ranges.push([f, f + LOG_WINDOW > latest ? latest : f + LOG_WINDOW]);
+  const logs = (
+    await Promise.all(
+      ranges.map(([fromBlock, toBlock]) =>
+        c.getContractEvents({ address: vault, abi: CERMIN_VAULT_V11_ABI, fromBlock, toBlock }).catch(() => []),
+      ),
+    )
+  ).flat();
+  const seen = new Set<string>();
+  const out: (LedgerEntry & { blockNumber: bigint })[] = [];
+  for (const l of logs) {
+    const key = `${l.transactionHash}-${l.logIndex}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
     const a = l.args as Record<string, unknown>;
-    const base = { blockNumber: l.blockNumber!, txHash: l.transactionHash!, logIndex: l.logIndex! };
+    const base = { key, txHash: l.transactionHash!, blockNumber: l.blockNumber! };
     if (l.eventName === "Defended")
-      out.push({
-        ...base,
-        kind: "defended",
-        amount: a.repaid as bigint,
-        icrBps: a.icrBefore as bigint,
-        icrAfterBps: a.icrAfter as bigint,
-      });
+      out.push({ ...base, kind: "defended", amount: a.repaid as bigint, icrBps: a.icrBefore as bigint, icrAfterBps: a.icrAfter as bigint });
     else if (l.eventName === "Skimmed")
       out.push({ ...base, kind: "skimmed", amount: (a.toSpendable as bigint) + (a.toVault as bigint), price: a.priceAtSkim as bigint });
   }
-  return out;
+  const times = new Map<bigint, number>();
+  await Promise.all(
+    [...new Set(out.map((e) => e.blockNumber))].map(async (b) => {
+      times.set(b, Number((await c.getBlock({ blockNumber: b })).timestamp));
+    }),
+  );
+  return out.map(({ blockNumber, ...e }) => ({ ...e, timestamp: times.get(blockNumber) }));
 }

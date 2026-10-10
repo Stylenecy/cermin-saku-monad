@@ -63,7 +63,7 @@ function ErrorState() {
         <span className="text-danger text-xl">!</span>
       </div>
       <h2 className="text-lg font-semibold text-ink">
-        {t("Tidak bisa terhubung ke BNB Chain", "Couldn't reach BNB Chain")}
+        {t("Tidak bisa terhubung ke Monad", "Couldn't reach Monad")}
       </h2>
       <p className="text-muted text-sm mt-2">
         {t(
@@ -98,8 +98,8 @@ function NoPositionState() {
         </h2>
         <p className="text-muted text-sm mt-3 max-w-md mx-auto leading-relaxed">
           {t(
-            "Setor BNB sekali untuk membuka vault-mu di BNB Chain. Dari situ kamu bisa menjadwalkan uang saku untuk anakmu tanpa menjual BNB untuk membayarnya.",
-            "Deposit BNB once to open your vault on BNB Chain. From there you can schedule your child's allowance without selling BNB to pay it.",
+            "Setor MON sekali untuk membuka vault-mu di Monad. Dari situ kamu bisa menjadwalkan uang saku untuk anakmu tanpa menjual MON untuk membayarnya.",
+            "Deposit MON once to open your vault on Monad. From there you can schedule your child's allowance without selling MON to pay it.",
           )}
         </p>
         <div className="mt-8 flex justify-center">
@@ -230,8 +230,8 @@ export default function DashboardPage() {
                   "Your vault dipped below its defense line — hit Defend below to recover.",
                 )
               : t(
-                  "BNB-mu tetap utuh. Uang saku dibayar dari saldo pakai sesuai jadwal; kalau BNB turun terlalu dalam, pembayaran ditahan dan penjaga membela posisimu lebih dulu.",
-                  "Your BNB stays whole. Allowances are paid from the spendable balance on schedule; if BNB falls too far, payments are held and the guard defends your position first.",
+                  "MON-mu tetap utuh. Uang saku dibayar dari saldo pakai sesuai jadwal; kalau MON turun terlalu dalam, pembayaran ditahan dan penjaga membela posisimu lebih dulu.",
+                  "Your MON stays whole. Allowances are paid from the spendable balance on schedule; if MON falls too far, payments are held and the guard defends your position first.",
                 )}
           </p>
         </motion.div>

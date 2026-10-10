@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { animate, createScope, stagger, type Scope } from "animejs";
 import { Zap } from "lucide-react";
 
-/* "Skims on every peak" — a BNB price line that draws itself, peak markers that
+/* "Skims on every peak" — a MON price line that draws itself, peak markers that
    pop with a stagger, and floating skim chips. Choreographed with anime.js and
    replayed each time the card scrolls into view. */
 export function PeakVisual() {

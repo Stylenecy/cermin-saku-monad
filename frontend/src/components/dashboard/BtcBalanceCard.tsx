@@ -84,7 +84,7 @@ export function BtcBalanceCard({
           <span className="font-mono text-xs text-amber-500 tabular-nums">001</span>
           <div>
             <p className="text-[11px] uppercase tracking-[0.16em] text-muted font-medium">
-              {t("BNB · jaminan", "BNB · collateral")}
+              {t("MON · jaminan", "MON · collateral")}
             </p>
             <p className="text-muted-2 text-xs">{t("Terkunci sebagai jaminan", "Locked as collateral")}</p>
           </div>
@@ -104,7 +104,7 @@ export function BtcBalanceCard({
             className="block text-4xl font-semibold text-ink tabular-nums tracking-tight leading-none"
           />
           <p className="text-base font-medium text-muted-2 mt-1">
-            BNB ·{" "}
+            MON ·{" "}
             <AnimatedNumber key={rate} value={usdValue} format={(n) => formatIdr(n * rate)} className="tabular-nums" />
             <span className="ml-1.5 text-[0.8em] font-normal text-muted tabular-nums">≈ {formatUsd(usdValue)}</span>
           </p>
@@ -131,7 +131,7 @@ export function BtcBalanceCard({
       <div className="relative mt-4">
         <div className="flex items-center justify-between text-[11px] font-mono mb-1.5">
           <span className="text-muted">
-            {t("Dipinjam dari nilai BNB", "Borrowed against BNB")}{" "}
+            {t("Dipinjam dari nilai MON", "Borrowed against MON")}{" "}
             <span className="text-ink tabular-nums">{ltvPct.toFixed(0)}%</span>
           </span>
           <span className="text-muted-2 tabular-nums">
@@ -151,21 +151,21 @@ export function BtcBalanceCard({
           {!showForm ? (
             <Button variant="secondary" size="sm" onClick={() => setShowForm(true)} className="w-full">
               <Plus className="w-4 h-4" />
-              {t("Tambah BNB", "Add BNB")}
+              {t("Tambah MON", "Add MON")}
             </Button>
           ) : (
             <div className="space-y-2 animate-fade-in">
               <p className="text-[11px] text-muted-2 leading-relaxed">
                 {t(
-                  "Tambah BNB = bantalan aman lebih tebal. Ini tidak otomatis menambah pinjaman.",
-                  "More BNB = a bigger safety buffer. It doesn't borrow more on its own.",
+                  "Tambah MON = bantalan aman lebih tebal. Ini tidak otomatis menambah pinjaman.",
+                  "More MON = a bigger safety buffer. It doesn't borrow more on its own.",
                 )}
               </p>
               <input
                 type="number"
                 inputMode="decimal"
-                placeholder={t("Jumlah (BNB)", "Amount (BNB)")}
-                aria-label={t("Jumlah BNB yang ditambahkan", "Amount of BNB to add")}
+                placeholder={t("Jumlah (MON)", "Amount (MON)")}
+                aria-label={t("Jumlah MON yang ditambahkan", "Amount of MON to add")}
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 min={0}

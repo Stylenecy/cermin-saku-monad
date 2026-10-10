@@ -85,7 +85,7 @@ export function ShadowSection() {
                   ))}
                 </div>
                 <div className="mt-6 pt-5 border-t border-line space-y-3">
-                  <Row label={t("BNB terkunci", "BNB locked")} value="1,68 BNB" />
+                  <Row label={t("MON terkunci", "MON locked")} value="1,68 MON" />
                   <Row label={t("Cadangan pembela", "Defense reserve")} value="Rp 6.000.000" />
                   <Row label={t("Rasio · status", "Ratio · status")} value={t("200% · Aman", "200% · Safe")} mono />
                 </div>

@@ -81,9 +81,9 @@ type Persona = "parents" | "children";
 type Node = { id: string; label: string; sub: string; icon: React.ReactNode; x: number; y: number };
 
 const nodes = (t: (id: string, en: string) => string): Node[] => [
-  { id: "vault", label: t("Vault BNB", "BNB vault"), sub: t("jaminan, tidak dijual", "collateral, never sold"), icon: <Vault className="w-5 h-5" />, x: 150, y: 250 },
+  { id: "vault", label: t("Vault MON", "MON vault"), sub: t("jaminan, tidak dijual", "collateral, never sold"), icon: <Vault className="w-5 h-5" />, x: 150, y: 250 },
   { id: "musd", label: "MUSD", sub: t("dolar pinjaman", "borrowed dollars"), icon: <DollarSign className="w-5 h-5" />, x: 322, y: 138 },
-  { id: "feed", label: t("Harga BNB", "BNB price"), sub: t("dibaca on-chain", "read on-chain"), icon: <Activity className="w-5 h-5" />, x: 500, y: 98 },
+  { id: "feed", label: t("Harga MON", "MON price"), sub: t("dibaca on-chain", "read on-chain"), icon: <Activity className="w-5 h-5" />, x: 500, y: 98 },
   { id: "saku", label: t("Amplop", "Envelopes"), sub: t("jadwal uang saku", "allowance schedule"), icon: <Mail className="w-5 h-5" />, x: 678, y: 138 },
   { id: "guard", label: t("Penjaga", "Guard"), sub: t("bela sebelum likuidasi", "defends before liquidation"), icon: <ShieldCheck className="w-5 h-5" />, x: 850, y: 250 },
 ];
@@ -92,8 +92,8 @@ const CENTER = { x: 500, y: 430 };
 
 const captions = (t: (id: string, en: string) => string): Record<Persona, string> => ({
   parents: t(
-    "Setor sekali, atur jadwal, selesai. Uang saku terkirim tiap periode, BNB-mu tetap utuh, dan pembayaran berhenti sendiri saat posisimu butuh dibela.",
-    "Deposit once, set a schedule, done. The allowance goes out every period, your BNB stays whole, and payments pause on their own when the position needs defending.",
+    "Setor sekali, atur jadwal, selesai. Uang saku terkirim tiap periode, MON-mu tetap utuh, dan pembayaran berhenti sendiri saat posisimu butuh dibela.",
+    "Deposit once, set a schedule, done. The allowance goes out every period, your MON stays whole, and payments pause on their own when the position needs defending.",
   ),
   children: t(
     "Uang saku masuk ke dompetmu sesuai jadwal. Kalau sedang ditahan, kamu bisa lihat alasannya, dan amplopnya tetap terutang sampai dibayar.",

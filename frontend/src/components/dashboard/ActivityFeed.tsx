@@ -33,11 +33,11 @@ export interface FeedEvent {
 // switching language never refetches the logs.
 const TEXT: Record<EventKind, { title: [string, string]; detail?: [string, string] }> = {
   Opened: { title: ["Vault dibuka", "Vault opened"], detail: ["Shadow-mu mulai jalan", "Your Shadow went live"] },
-  Skimmed: { title: ["Skim saat BNB naik", "Skimmed on a peak"], detail: ["Shadow-mu bertambah", "Topped up your Shadow"] },
+  Skimmed: { title: ["Skim saat MON naik", "Skimmed on a peak"], detail: ["Shadow-mu bertambah", "Topped up your Shadow"] },
   Defended: { title: ["Keeper membela posisi", "Defended the dip"] },
   Withdrawn: { title: ["Tarik dari Shadow", "Withdrew from Shadow"] },
   Deposited: { title: ["Jaminan ditambah", "Added collateral"], detail: ["Bantalan aman makin tebal", "Raised your buffer"] },
-  Closed: { title: ["Vault ditutup", "Vault closed"], detail: ["BNB dikembalikan ke kamu", "BNB returned to you"] },
+  Closed: { title: ["Vault ditutup", "Vault closed"], detail: ["MON dikembalikan ke kamu", "MON returned to you"] },
 };
 
 // The vault only ever emits these events, so we can pull every log it produced
@@ -55,11 +55,12 @@ const VAULT_ABI = [
   parseAbiItem("event Closed(uint256 btcReturned, uint256 musdRemainder)"),
 ] as const satisfies Abi;
 
-// Public BSC RPCs cap eth_getLogs ranges (often ~5k blocks), so we walk backwards in
-// chunks. Activity (skim/defend) can be days old — far outside any short window
-// — so we scan the vault's whole lifetime, stopping once we hit VaultOpened.
-const CHUNK_BLOCKS = 4_999n;
-const MAX_CHUNKS = 80;
+// Monad's public RPC answers eth_getLogs for at most 100 blocks (~40 s) per call,
+// so we walk backwards in 100-block chunks, stopping at VaultOpened or after
+// MAX_CHUNKS (~20 minutes of blocks). Allowance history does not depend on this:
+// it lives in CerminSaku's passbook, read from contract state.
+const CHUNK_BLOCKS = 99n;
+const MAX_CHUNKS = 30;
 const REFRESH_MS = 30_000;
 
 function musd(wei: bigint): string {
@@ -132,7 +133,7 @@ function toFeedEvent(log: {
         type: "Deposited",
         title: "Added collateral",
         detail: "Raised your buffer",
-        value: `+${(Number(amt) / 1e18).toFixed(4)} BNB`,
+        value: `+${(Number(amt) / 1e18).toFixed(4)} MON`,
         tone: "amber",
       };
     }
@@ -142,8 +143,8 @@ function toFeedEvent(log: {
         ...base,
         type: "Closed",
         title: "Vault closed",
-        detail: "BNB returned to you",
-        value: `${(Number(btc) / 1e18).toFixed(4)} BNB`,
+        detail: "MON returned to you",
+        value: `${(Number(btc) / 1e18).toFixed(4)} MON`,
         tone: "muted",
       };
     }

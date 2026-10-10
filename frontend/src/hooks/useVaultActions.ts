@@ -112,7 +112,7 @@ export function useVaultActions(vaultAddress: `0x${string}` | undefined) {
     (amountWei: bigint) => {
       if (!vaultAddress || amountWei <= 0n) return;
       resetDeposit();
-      // deposit() forwards BNB to the CDP's addColl. Hints are 0x0 (MVP, like open).
+      // deposit() forwards MON to the CDP's addColl. Hints are 0x0 (MVP, like open).
       writeDeposit({
         address: vaultAddress,
         abi: CERMIN_VAULT_ABI,

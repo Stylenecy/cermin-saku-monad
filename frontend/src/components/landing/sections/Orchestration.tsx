@@ -19,8 +19,8 @@ export function Orchestration() {
           </h2>
           <p className="text-muted mt-4 text-pretty leading-relaxed">
             {t(
-              "Cermin Saku tidak memegang danamu. Ia merangkai vault BNB, dolar pinjaman, tabungan cadangan, dan harga on-chain, lalu menambahkan satu aturan: uang saku keluar hanya kalau posisinya aman.",
-              "Cermin Saku never holds your funds. It wires together the BNB vault, borrowed dollars, a savings reserve and an on-chain price, then adds one rule: an allowance goes out only while the position is safe.",
+              "Cermin Saku tidak memegang danamu. Ia merangkai vault MON, dolar pinjaman, tabungan cadangan, dan harga on-chain, lalu menambahkan satu aturan: uang saku keluar hanya kalau posisinya aman.",
+              "Cermin Saku never holds your funds. It wires together the MON vault, borrowed dollars, a savings reserve and an on-chain price, then adds one rule: an allowance goes out only while the position is safe.",
             )}
           </p>
         </Reveal>

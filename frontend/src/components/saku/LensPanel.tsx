@@ -26,7 +26,7 @@ const ZONE_TEXT: Record<Zone, { id: string; en: string; cls: string }> = {
 };
 
 /**
- * "Kalau BNB turun ke Rp X…" — every number below the slider is computed by
+ * "Kalau MON turun ke Rp X…" — every number below the slider is computed by
  * the CerminLens contract through eth_call at the hypothetical price. The page
  * does not re-implement the vault's math.
  */
@@ -107,7 +107,7 @@ export function LensPanel({
     >
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 id="lens-title" className="text-xl sm:text-2xl text-ink">
-          {t("Kalau BNB jadi", "If BNB goes to")}{" "}
+          {t("Kalau MON jadi", "If MON goes to")}{" "}
           <span className="text-tinta tabular">{formatIdr(priceIdr)}</span>
         </h2>
         <span className="text-sm text-muted tabular">
@@ -116,7 +116,7 @@ export function LensPanel({
       </div>
 
       <label htmlFor="lens-slider" className="sr-only">
-        {t("Harga BNB hipotetis, persen dari harga sekarang", "Hypothetical BNB price, percent of today's")}
+        {t("Harga MON hipotetis, persen dari harga sekarang", "Hypothetical MON price, percent of today's")}
       </label>
       <input
         id="lens-slider"
@@ -208,8 +208,8 @@ export function LensPanel({
 
       <p className="mt-4 text-xs text-muted">
         {t(
-          "Angka di atas dihitung kontrak CerminLens lewat eth_call pada harga hipotetis: tanpa transaksi, tanpa gas. Cermin sendiri tidak pernah menjual BNB; di bawah garis likuidasi, CDP sungguhan bisa menyita jaminan, karena itu keeper membela lebih awal.",
-          "Figures above are computed by the CerminLens contract via eth_call at the hypothetical price: no transaction, no gas. Cermin itself never sells BNB; below the liquidation line a real CDP could seize collateral, which is why the keeper defends earlier.",
+          "Angka di atas dihitung kontrak CerminLens lewat eth_call pada harga hipotetis: tanpa transaksi, tanpa gas. Cermin sendiri tidak pernah menjual MON; di bawah garis likuidasi, CDP sungguhan bisa menyita jaminan, karena itu keeper membela lebih awal.",
+          "Figures above are computed by the CerminLens contract via eth_call at the hypothetical price: no transaction, no gas. Cermin itself never sells MON; below the liquidation line a real CDP could seize collateral, which is why the keeper defends earlier.",
         )}
       </p>
     </section>

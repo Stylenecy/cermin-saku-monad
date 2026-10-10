@@ -16,7 +16,7 @@ export function formatUsd(value: number, decimals = 2): string {
 
 export function formatBtc(wei: bigint): string {
   const btc = Number(wei) / 1e18;
-  return btc.toFixed(6) + " BNB";
+  return btc.toFixed(6) + " MON";
 }
 
 export function formatMusd(wei: bigint): string {

@@ -6,7 +6,7 @@ export interface SimulationResult {
   inVault: number;
   monthlyIncome: number;
   annualIncome: number;
-  /** Fractional BNB price drop before defendICR triggers (0–1). */
+  /** Fractional MON price drop before defendICR triggers (0–1). */
   btcDropTolerance: number;
 }
 
@@ -41,7 +41,7 @@ export function simulate(
   const monthlyIncome = annualIncome / 12;
 
   // ICR at open = BPS² / targetLTV. Defense fires when ICR < defendICR.
-  // BNB drop tolerance = 1 - defendICR / openICR.
+  // MON drop tolerance = 1 - defendICR / openICR.
   const openICR = (BPS * BPS) / params.targetLTV;
   const btcDropTolerance = Math.max(0, 1 - params.defendICR / openICR);
 

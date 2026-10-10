@@ -11,6 +11,8 @@ import { formatIdr, idrToMusdWei, useUsdIdr } from "@/lib/idr";
 import { formatTxError } from "@/lib/utils";
 import { buttonClasses } from "@/components/ui/Button";
 import { Rp } from "./Money";
+import { useConfirmTimer } from "@/hooks/useConfirmTimer";
+import { ConfirmedIn } from "./ConfirmedIn";
 
 const field =
   "mt-1.5 w-full rounded-lg border border-line bg-surface px-3 py-2.5 text-ink placeholder:text-muted-2 focus:border-tinta focus:outline-none focus:ring-2 focus:ring-amber-200";
@@ -56,6 +58,8 @@ export function CreateSchedule({
   const create = useWriteContract();
   const grantRc = useWaitForTransactionReceipt({ hash: grant.data });
   const createRc = useWaitForTransactionReceipt({ hash: create.data });
+  const grantMs = useConfirmTimer(grant.data, grantRc.isSuccess);
+  const createMs = useConfirmTimer(create.data, createRc.isSuccess);
 
   useEffect(() => {
     if (grantRc.isSuccess) qc.invalidateQueries();
@@ -171,8 +175,12 @@ export function CreateSchedule({
       {(grant.error || create.error) && (
         <p className="mt-3 text-sm text-stempel">{formatTxError(grant.error ?? create.error, 200)}</p>
       )}
+      {grantRc.isSuccess && !createRc.isSuccess && <ConfirmedIn ms={grantMs} className="mt-3" />}
       {createRc.isSuccess && (
-        <p className="mt-3 text-sm text-daun">{t("Terjadwal. Keeper akan mengirim amplop pertama.", "Scheduled. The keeper will send the first envelope.")}</p>
+        <div className="mt-3 space-y-2">
+          <p className="text-sm text-daun">{t("Terjadwal. Keeper akan mengirim amplop pertama.", "Scheduled. The keeper will send the first envelope.")}</p>
+          <ConfirmedIn ms={createMs} />
+        </div>
       )}
       <p className="mt-4 text-xs text-muted">
         {t(

@@ -116,8 +116,8 @@ export function Features() {
       icon: <PauseCircle className="w-5 h-5" />,
       title: t("Berhenti sendiri saat pasar jatuh", "Pauses itself when the market falls"),
       body: t(
-        "Kalau BNB turun sampai posisimu mendekati bahaya, uang saku berikutnya ditahan oleh kontrak, bukan oleh aplikasi. Begitu pulih, yang tertunda dibayar.",
-        "If BNB falls far enough to put the position near danger, the next allowance is held by the contract, not by the app. Once it recovers, what was owed is paid.",
+        "Kalau MON turun sampai posisimu mendekati bahaya, uang saku berikutnya ditahan oleh kontrak, bukan oleh aplikasi. Begitu pulih, yang tertunda dibayar.",
+        "If MON falls far enough to put the position near danger, the next allowance is held by the contract, not by the app. Once it recovers, what was owed is paid.",
       ),
       tone: "amber",
       span: "sm:col-span-2 lg:col-span-2 lg:row-span-2",
@@ -126,7 +126,7 @@ export function Features() {
     },
     {
       icon: <ShieldCheck className="w-5 h-5" />,
-      title: t("BNB tidak disentuh", "BNB stays untouched"),
+      title: t("MON tidak disentuh", "MON stays untouched"),
       body: t("Jaminan tidak pernah keluar dari vault. Yang bergerak hanya dolar pinjaman.", "Collateral never leaves the vault. Only the borrowed dollars move."),
       tone: "sage",
       span: "",

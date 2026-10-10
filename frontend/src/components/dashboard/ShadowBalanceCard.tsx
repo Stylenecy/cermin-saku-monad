@@ -88,8 +88,8 @@ export function ShadowBalanceCard({
 
       <p className="text-xs text-muted-2 mt-3 leading-relaxed">
         {t(
-          "Dipinjam dengan jaminan BNB-mu. Tarik ke alamat mana pun untuk dipakai. BNB-mu tetap utuh.",
-          "Borrowed against your BNB. Withdraw to any address to spend — your BNB stays locked.",
+          "Dipinjam dengan jaminan MON-mu. Tarik ke alamat mana pun untuk dipakai. MON-mu tetap utuh.",
+          "Borrowed against your MON. Withdraw to any address to spend — your MON stays locked.",
         )}
       </p>
 

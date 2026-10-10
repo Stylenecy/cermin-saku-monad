@@ -73,7 +73,7 @@ export function Hero({
         >
           {lang === "id" ? (
             <>
-              BNB-mu tetap <em className="font-normal italic">utuh</em>.
+              MON-mu tetap <em className="font-normal italic">utuh</em>.
               <br />
               <LineShadowText as="span" shadowColor="#35648F" className="font-normal italic text-ink">
                 Uang saku
@@ -82,7 +82,7 @@ export function Hero({
             </>
           ) : (
             <>
-              Your BNB stays <em className="font-normal italic">whole</em>.
+              Your MON stays <em className="font-normal italic">whole</em>.
               <br />
               <span className="font-normal italic text-muted-2">Your child&apos;s </span>
               <LineShadowText as="span" shadowColor="#35648F" className="font-normal italic text-ink">
@@ -98,8 +98,8 @@ export function Hero({
           className="mt-5 text-sm sm:text-base md:text-lg text-muted max-w-2xl mx-auto text-pretty leading-relaxed"
         >
           {t(
-            "Setor BNB sekali. Cermin Saku meminjam dolar di atasnya dan mengirim uang saku ke dompet anakmu sesuai jadwal. Saat BNB jatuh terlalu dalam, kontraknya sendiri menahan pembayaran sampai aman lagi.",
-            "Deposit BNB once. Cermin Saku borrows dollars against it and sends your child's allowance on schedule. When BNB falls too far, the contract itself holds the payment until it is safe again.",
+            "Setor MON sekali. Cermin Saku meminjam dolar di atasnya dan mengirim uang saku ke dompet anakmu sesuai jadwal. Saat MON jatuh terlalu dalam, kontraknya sendiri menahan pembayaran sampai aman lagi.",
+            "Deposit MON once. Cermin Saku borrows dollars against it and sends your child's allowance on schedule. When MON falls too far, the contract itself holds the payment until it is safe again.",
           )}
         </motion.p>
 

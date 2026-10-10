@@ -6,7 +6,7 @@ import { Check } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 
 /* "Holds itself when it's unsafe" — Kiel's PeakVisual choreography (anime.js,
-   replayed each time the card scrolls into view) on a BNB line that dips under
+   replayed each time the card scrolls into view) on a MON line that dips under
    the safety line: paid on the way up, DITAHAN in the dip, paid again after. */
 export function GateVisual() {
   const { t } = useLang();

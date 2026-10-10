@@ -12,6 +12,7 @@ import { useFeedPrice, useLensSnapshot, useVaultSchedules } from "@/hooks/useSak
 import { SakuNav, SakuFooter } from "@/components/saku/SakuNav";
 import { LensPanel } from "@/components/saku/LensPanel";
 import { Ledger } from "@/components/saku/Ledger";
+import { OnTimeCard } from "@/components/saku/OnTimeCard";
 import { ScheduleCards } from "@/components/saku/ScheduleCards";
 import { ContractList } from "@/components/saku/ContractList";
 import { RateNote } from "@/components/saku/Money";
@@ -47,7 +48,7 @@ export default function DemoPage() {
             <div className="inline-flex items-center gap-2.5 rounded-full border border-cream-300 bg-surface/70 backdrop-blur px-3 py-1.5 mb-3">
               <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${safe ? "bg-success" : "bg-warning"}`} />
               <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink">
-                {t("Vault demo · BNB Chain testnet", "Demo vault · BNB Chain testnet")}
+                {t("Vault demo · Monad testnet", "Demo vault · Monad testnet")}
               </span>
             </div>
             <h1 className="font-serif text-[2rem] md:text-[2.5rem] font-medium tracking-[-0.02em] text-ink leading-tight">
@@ -59,8 +60,8 @@ export default function DemoPage() {
             </h1>
             <p className="text-muted mt-2.5 text-pretty max-w-xl leading-relaxed">
               {t(
-                "Ini vault sungguhan di testnet, dibaca langsung dari kontrak tanpa dompet. Lihat jadwal uang sakunya, setiap pembayaran dan penahanan, lalu geser harga BNB untuk melihat apa yang akan dilakukan kontrak.",
-                "A real vault on testnet, read straight from the contracts without a wallet. See its allowance schedule, every payment and hold, then slide the BNB price to see what the contract would do.",
+                "Ini vault sungguhan di testnet, dibaca langsung dari kontrak tanpa dompet. Lihat jadwal uang sakunya, setiap pembayaran dan penahanan, lalu geser harga MON untuk melihat apa yang akan dilakukan kontrak.",
+                "A real vault on testnet, read straight from the contracts without a wallet. See its allowance schedule, every payment and hold, then slide the MON price to see what the contract would do.",
               )}
             </p>
           </motion.div>
@@ -110,6 +111,10 @@ export default function DemoPage() {
               </motion.div>
 
               <motion.div variants={fadeUp} className="mt-10">
+                <OnTimeCard vault={vault} />
+              </motion.div>
+
+              <motion.div variants={fadeUp} className="mt-10">
                 <Ledger vault={vault} limit={8} keyFirst />
               </motion.div>
 
@@ -143,10 +148,11 @@ function DemoScope() {
     t("Aturan uang saku dijalankan di dalam vault, bukan oleh aplikasi", "The allowance rule is enforced inside the vault, not by the app"),
     t("Urutan nyata on-chain: dibayar → ditahan → dibela → dibayar lagi", "A real on-chain sequence: paid → held → defended → paid again"),
     t("Siapa pun bisa memicu pembayaran; vault tetap memeriksa ulang", "Anyone can trigger a payment; the vault re-checks it anyway"),
+    t("Di Monad, amplop dibayar beberapa detik setelah jatuh tempo, terbukti dari cap waktu di kontrak", "On Monad, envelopes are paid seconds after falling due, shown by timestamps in the contract"),
   ];
   const notYet = [
     t("Bunga pinjaman sungguhan: CDP tiruan di testnet tidak memungut bunga", "Real borrowing cost: the testnet mock CDP charges no interest"),
-    t("Harga dan likuidasi sungguhan: harga BNB di sini disimulasikan", "Real prices and liquidations: the BNB price here is simulated"),
+    t("Harga dan likuidasi sungguhan: harga MON di sini disimulasikan", "Real prices and liquidations: the MON price here is simulated"),
     t("Penukaran ke Rupiah, pengguna nyata, dan audit keamanan", "Rupiah off-ramp, real users, and a security audit"),
   ];
   return (
@@ -178,7 +184,7 @@ function DemoScope() {
         </ul>
       </div>
       <a
-        href="https://github.com/Stylenecy/cermin-saku/blob/dex/cermin-saku/docs/THREAT-MODEL.md"
+        href="https://github.com/Stylenecy/cermin-saku-monad/blob/main/docs/THREAT-MODEL.md"
         target="_blank"
         rel="noopener noreferrer"
         className="mt-6 inline-flex text-sm font-medium text-amber-600 hover:text-amber-700"

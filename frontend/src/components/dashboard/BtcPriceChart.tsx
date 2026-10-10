@@ -21,7 +21,7 @@ interface Pt {
 
 async function fetchHistory(): Promise<Pt[]> {
   const res = await fetch(
-    "https://api.coingecko.com/api/v3/coins/binancecoin/market_chart?vs_currency=usd&days=30",
+    "https://api.coingecko.com/api/v3/coins/monad/market_chart?vs_currency=usd&days=30",
   );
   if (!res.ok) throw new Error(`coingecko ${res.status}`);
   const json = (await res.json()) as { prices: [number, number][] };
@@ -53,7 +53,7 @@ export function BtcPriceChart({ currentPrice, liquidationPrice, defensePrice }: 
   const { t, lang } = useLang();
   const { rate } = useUsdIdr();
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["bnb-history-30d"],
+    queryKey: ["mon-history-30d"],
     queryFn: fetchHistory,
     staleTime: 5 * 60_000,
     gcTime: 30 * 60_000,
@@ -97,7 +97,7 @@ export function BtcPriceChart({ currentPrice, liquidationPrice, defensePrice }: 
           <span className="font-mono text-xs text-amber-500 tabular-nums">◆</span>
           <div>
             <p className="text-[11px] uppercase tracking-[0.16em] text-muted font-medium">
-              {t("Harga BNB", "BNB price")}
+              {t("Harga MON", "MON price")}
             </p>
             <p className="text-muted-2 text-xs">
               {t(
@@ -134,7 +134,7 @@ export function BtcPriceChart({ currentPrice, liquidationPrice, defensePrice }: 
           </p>
         </div>
       ) : (
-        <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" aria-label={t("Grafik harga BNB", "BNB price chart")}>
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" aria-label={t("Grafik harga MON", "MON price chart")}>
           <defs>
             <linearGradient id="btcArea" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#1E4A8F" stopOpacity="0.22" />

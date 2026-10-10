@@ -104,8 +104,8 @@ export function CloseVaultPanel({
           <p className="text-sm font-semibold text-ink">{t("Tutup vault", "Close vault")}</p>
           <p className="text-xs text-muted mt-1 max-w-lg leading-relaxed">
             {t(
-              "Melunasi utang MUSD-mu dan membuka kunci BNB-mu. Shadow-mu (saldo pakai + tabungan) dipakai untuk melunasi pinjaman. Ini tidak bisa dibatalkan.",
-              "Repays your MUSD debt and unlocks your BNB. Your Shadow (spendable + savings) is spent to clear the loan — this can't be undone.",
+              "Melunasi utang MUSD-mu dan membuka kunci MON-mu. Shadow-mu (saldo pakai + tabungan) dipakai untuk melunasi pinjaman. Ini tidak bisa dibatalkan.",
+              "Repays your MUSD debt and unlocks your MON. Your Shadow (spendable + savings) is spent to clear the loan — this can't be undone.",
             )}
           </p>
         </div>
@@ -176,8 +176,8 @@ export function CloseVaultPanel({
         />
         <span className="text-xs text-muted">
           {t(
-            "Aku paham ini menutup vault-ku dan mengembalikan BNB-ku.",
-            "I understand this closes my vault and returns my BNB.",
+            "Aku paham ini menutup vault-ku dan mengembalikan MON-ku.",
+            "I understand this closes my vault and returns my MON.",
           )}
         </span>
       </label>

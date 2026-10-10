@@ -13,13 +13,13 @@ import { cn } from "@/lib/utils";
 
 const AMOUNTS = [250_000, 500_000, 1_000_000, 2_000_000];
 const MONTHS = [3, 6, 12, 24];
-const FALLBACK_BNB_USD = 800; // only if the price feed cannot be read
+const FALLBACK_MON_USD = 0.0244; // only if the price feed cannot be read
 
 /**
- * "How much BNB do I need?" — the vault's own Balanced rule: it borrows
+ * "How much MON do I need?" — the vault's own Balanced rule: it borrows
  * targetLTV of the collateral value and keeps spendableShare of that as the
  * spendable balance the allowance is paid from (the rest is the defense
- * reserve). So BNB needed = total allowance / (LTV × share) / price.
+ * reserve). So MON needed = total allowance / (LTV × share) / price.
  */
 export function Calculator() {
   const { t, lang } = useLang();
@@ -30,7 +30,7 @@ export function Calculator() {
 
   const p = PRESETS.balanced;
   const share = (p.targetLTV / 10_000) * (p.spendableShare / 10_000);
-  const bnbUsd = price ? Number(price) / 1e18 : FALLBACK_BNB_USD;
+  const bnbUsd = price ? Number(price) / 1e18 : FALLBACK_MON_USD;
   const totalIdr = amount * months;
   const totalUsd = totalIdr / rate;
   const collateralUsd = totalUsd / share;
@@ -93,12 +93,12 @@ export function Calculator() {
                 <div className="relative">
                   <div className="text-xs uppercase tracking-[0.18em] font-mono text-amber-200">{t("Setor sebagai jaminan", "Deposit as collateral")}</div>
                   <div className="font-serif text-5xl md:text-6xl font-medium tracking-[-0.02em] mt-2 tabular-nums">
-                    ≈ {formatNum(bnb, lang, 2)} <span className="italic font-normal text-amber-200">BNB</span>
+                    ≈ {formatNum(bnb, lang, 2)} <span className="italic font-normal text-amber-200">MON</span>
                   </div>
                   <p className="text-sm text-cream-200/80 mt-3 leading-relaxed text-pretty">
                     {t(
-                      `untuk ${formatIdr(amount)} tiap bulan selama ${months} bulan. BNB-nya tetap milikmu dan bisa diambil lagi saat vault ditutup.`,
-                      `for ${formatIdr(amount)} a month for ${months} months. The BNB stays yours and comes back when you close the vault.`,
+                      `untuk ${formatIdr(amount)} tiap bulan selama ${months} bulan. MON-nya tetap milikmu dan bisa diambil lagi saat vault ditutup.`,
+                      `for ${formatIdr(amount)} a month for ${months} months. The MON stays yours and comes back when you close the vault.`,
                     )}
                   </p>
                   <dl className="mt-6 pt-5 border-t border-white/10 grid grid-cols-2 gap-4 text-sm">
@@ -116,8 +116,8 @@ export function Calculator() {
             </div>
             <p className="mt-6 text-xs text-muted-2">
               {t(
-                `Harga acuan 1 BNB = ${formatIdr(bnbUsd * rate)} (feed testnet). Kalau BNB naik, vault bisa menambah saldo pakai; kalau turun jauh, uang saku ditahan dulu. Belum termasuk bunga pinjaman di jaringan utama.`,
-                `Reference price 1 BNB = ${formatIdr(bnbUsd * rate)} (testnet feed). If BNB rises the vault can top up the spendable balance; if it falls far, the allowance is held first. Mainnet borrowing interest is not included.`,
+                `Harga acuan 1 MON = ${formatIdr(bnbUsd * rate)} (feed testnet). Kalau MON naik, vault bisa menambah saldo pakai; kalau turun jauh, uang saku ditahan dulu. Belum termasuk bunga pinjaman di jaringan utama.`,
+                `Reference price 1 MON = ${formatIdr(bnbUsd * rate)} (testnet feed). If MON rises the vault can top up the spendable balance; if it falls far, the allowance is held first. Mainnet borrowing interest is not included.`,
               )}
             </p>
           </Card>

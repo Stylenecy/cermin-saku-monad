@@ -44,16 +44,16 @@ export const GOAL_LABELS: Record<GoalLabel, { title: Bilingual; tagline: Bilingu
   forever: {
     title: { id: "Uang Saku Selamanya", en: "Forever Allowance" },
     tagline: {
-      id: "Hasil yang terus mengalir tanpa batas waktu. BNB tidak dijual untuk membayarnya.",
-      en: "Earn sustainable yield indefinitely. No BNB is sold to pay for it.",
+      id: "Hasil yang terus mengalir tanpa batas waktu. MON tidak dijual untuk membayarnya.",
+      en: "Earn sustainable yield indefinitely. No MON is sold to pay for it.",
     },
     badge: { id: "Pensiun", en: "Pension" },
   },
   spendNow: {
     title: { id: "Pakai Sekarang, Lunasi Nanti", en: "Spend Now, Reclaim Later" },
     tagline: {
-      id: "Pinjam MUSD dengan jaminan BNB, lunasi sesuai waktumu.",
-      en: "Borrow MUSD against BNB; repay it on your timeline.",
+      id: "Pinjam MUSD dengan jaminan MON, lunasi sesuai waktumu.",
+      en: "Borrow MUSD against MON; repay it on your timeline.",
     },
     badge: { id: "Target", en: "Goal" },
   },

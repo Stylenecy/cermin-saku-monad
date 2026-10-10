@@ -68,12 +68,12 @@ export default function SakuPage() {
           <div className="mt-8 rounded-3xl border border-cream-300 bg-surface shadow-soft p-6 sm:p-8">
             <p className="max-w-xl leading-relaxed text-muted">
               {t(
-                "Dompet ini belum punya vault. Uang saku dibayar dari saldo pakai vault, jadi buka vault dulu dengan menyetor BNB.",
-                "This wallet has no vault yet. Allowances are paid from the vault's spendable balance, so open a vault by depositing BNB first.",
+                "Dompet ini belum punya vault. Uang saku dibayar dari saldo pakai vault, jadi buka vault dulu dengan menyetor MON.",
+                "This wallet has no vault yet. Allowances are paid from the vault's spendable balance, so open a vault by depositing MON first.",
               )}
             </p>
             <Link href="/onboard" className={`${buttonClasses({ variant: "primary", size: "lg" })} mt-5`}>
-              {t("Buka vault dengan BNB", "Open a vault with BNB")}
+              {t("Buka vault dengan MON", "Open a vault with MON")}
             </Link>
           </div>
         ) : (
@@ -96,7 +96,7 @@ export default function SakuPage() {
                 <p className="mt-1 text-sm text-ink">
                   {policy && v.params
                     ? t(
-                        `Bayar hanya bila ICR ≥ ${bps(v.params.defendICR + policy.floorBufferBps)}% dan cadangan tahan BNB turun ${bps(policy.stressBps)}% lagi`,
+                        `Bayar hanya bila ICR ≥ ${bps(v.params.defendICR + policy.floorBufferBps)}% dan cadangan tahan MON turun ${bps(policy.stressBps)}% lagi`,
                         `Pay only if ICR ≥ ${bps(v.params.defendICR + policy.floorBufferBps)}% and the reserve survives another ${bps(policy.stressBps)}% drop`,
                       )
                     : "…"}

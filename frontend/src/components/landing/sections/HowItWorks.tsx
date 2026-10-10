@@ -12,10 +12,10 @@ export function HowItWorks() {
   const steps = [
     {
       n: "001",
-      title: t("Setor BNB", "Deposit BNB"),
+      title: t("Setor MON", "Deposit MON"),
       body: t(
-        "Kunci BNB di vault milikmu sendiri. BNB itu tidak dijual untuk membayar uang saku; yang dipakai hanya dolar digital (MUSD) yang dipinjam di atasnya.",
-        "Lock BNB in a vault that is yours alone. No BNB is sold to pay allowances; only the digital dollars (MUSD) borrowed against it are used.",
+        "Kunci MON di vault milikmu sendiri. MON itu tidak dijual untuk membayar uang saku; yang dipakai hanya dolar digital (MUSD) yang dipinjam di atasnya.",
+        "Lock MON in a vault that is yours alone. No MON is sold to pay allowances; only the digital dollars (MUSD) borrowed against it are used.",
       ),
       icon: <Coins className="w-7 h-7" />,
       variant: "diamond" as const,
@@ -34,8 +34,8 @@ export function HowItWorks() {
       n: "003",
       title: t("Kontrak yang menjaga", "The contract keeps watch"),
       body: t(
-        "Sebelum setiap pembayaran, kontrak memeriksa dua hal: posisinya sehat, dan cadangannya tetap cukup kalau BNB turun 30% lagi. Kalau belum aman, uang saku ditahan, bukan hilang, lalu dibayar begitu pulih.",
-        "Before every payment the contract checks two things: the position is healthy, and the reserve would survive another 30% fall in BNB. If not, the allowance is held, not lost, and paid once it recovers.",
+        "Sebelum setiap pembayaran, kontrak memeriksa dua hal: posisinya sehat, dan cadangannya tetap cukup kalau MON turun 30% lagi. Kalau belum aman, uang saku ditahan, bukan hilang, lalu dibayar begitu pulih.",
+        "Before every payment the contract checks two things: the position is healthy, and the reserve would survive another 30% fall in MON. If not, the allowance is held, not lost, and paid once it recovers.",
       ),
       icon: <ShieldCheck className="w-7 h-7" />,
       variant: "circle" as const,
@@ -58,12 +58,12 @@ export function HowItWorks() {
           <Eyebrow icon={<Layers className="w-3.5 h-3.5" />} label={t("Cara kerja", "How it works")} note={t("setor → jadwal → aman", "deposit → schedule → safe")} />
           <h2 className="font-serif text-3xl md:text-[2.75rem] font-medium tracking-[-0.02em] leading-[1.08] text-balance mt-5">
             {t("Tiga langkah. Satu vault. ", "Three steps. One vault. ")}
-            <em className="italic font-normal text-amber-600">{t("BNB tetap utuh.", "BNB stays put.")}</em>
+            <em className="italic font-normal text-amber-600">{t("MON tetap utuh.", "MON stays put.")}</em>
           </h2>
           <p className="text-muted mt-4 text-pretty leading-relaxed">
             {t(
-              "Orang tua menyetor sekali dan mengatur jadwal. Sisanya dikerjakan kontrak di BNB Chain, termasuk tahu kapan harus berhenti.",
-              "The parent deposits once and sets a schedule. The contracts on BNB Chain do the rest, including knowing when to stop.",
+              "Orang tua menyetor sekali dan mengatur jadwal. Sisanya dikerjakan kontrak di Monad, termasuk tahu kapan harus berhenti.",
+              "The parent deposits once and sets a schedule. The contracts on Monad do the rest, including knowing when to stop.",
             )}
           </p>
         </Reveal>
@@ -85,7 +85,7 @@ export function HowItWorks() {
                   {i === 0 && (
                     <div className="mt-5 inline-flex items-center gap-2 text-xs text-muted font-mono">
                       <span className="w-1.5 h-1.5 rounded-full bg-mint" />
-                      {t("Mulai dari ±0,05 BNB", "From about 0.05 BNB")}
+                      {t("Mulai dari ±0,05 MON", "From about 0.05 MON")}
                     </div>
                   )}
                   {i === 1 && (

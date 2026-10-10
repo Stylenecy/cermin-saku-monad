@@ -1,17 +1,12 @@
 import { http } from "viem";
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { createConfig as createPrivyConfig } from "@privy-io/wagmi";
-import { activeChain } from "./chains";
+import { activeChain, POLL_MS } from "./chains";
 
-// viem's default BSC RPCs reject the activity feed's eth_getLogs (BNB dataseed:
-// "limit exceeded" at any range; thirdweb: max 1000 blocks). publicnode serves
-// 5k-block ranges on both networks.
 const DEFAULT_RPC_URL =
-  activeChain.id === 56
-    ? "https://bsc-rpc.publicnode.com"
-    : "https://bsc-testnet-rpc.publicnode.com";
+  activeChain.id === 143 ? "https://rpc.monad.xyz" : "https://testnet-rpc.monad.xyz";
 
-const RPC_URL = process.env.NEXT_PUBLIC_BSC_RPC_URL || DEFAULT_RPC_URL;
+const RPC_URL = process.env.NEXT_PUBLIC_MONAD_RPC_URL || DEFAULT_RPC_URL;
 
 type WagmiConfig = ReturnType<typeof getDefaultConfig>;
 
@@ -36,8 +31,9 @@ const transport = () =>
 export function createPrivyWagmiConfig() {
   return createPrivyConfig({
     chains: [activeChain],
-    // only the active chain is ever used; the cast covers activeChain's 56 | 97 union type
-    transports: { [activeChain.id]: transport() } as Record<56 | 97, ReturnType<typeof transport>>,
+    // only the active chain is ever used; the cast covers activeChain's 143 | 10143 union type
+    transports: { [activeChain.id]: transport() } as Record<143 | 10143, ReturnType<typeof transport>>,
+    pollingInterval: POLL_MS,
     ssr: false,
   });
 }
@@ -45,12 +41,13 @@ export function createPrivyWagmiConfig() {
 export function createWagmiConfig(): WagmiConfig {
   if (!cached) {
     cached = getDefaultConfig({
-      appName: "Cermin",
+      appName: "Cermin Saku",
       projectId:
         process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ||
         "cermin-hackathon-demo",
       chains: [activeChain],
       transports: { [activeChain.id]: transport() },
+      pollingInterval: POLL_MS,
       ssr: false,
     });
   }

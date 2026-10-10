@@ -13,28 +13,28 @@ export function FAQ() {
   const [open, setOpen] = useState<number | null>(0);
   const qs = [
     {
-      q: t("Apakah BNB-ku dijual?", "Is my BNB ever sold?"),
+      q: t("Apakah MON-ku dijual?", "Is my MON ever sold?"),
       a: t(
-        "Tidak untuk membayar uang saku. BNB dikunci sebagai jaminan di vault yang hanya bisa ditutup olehmu, dan uang saku diambil dari dolar yang dipinjam di atasnya. Seperti pinjaman berjaminan mana pun, BNB baru bisa hilang kalau posisi jatuh sampai garis likuidasi; dua gerbang dan penjaga ada untuk mencegah itu, tapi risikonya tidak nol.",
-        "Not to pay allowances. Your BNB is locked as collateral in a vault only you can close, and the allowance is paid from dollars borrowed against it. As with any collateralised loan, BNB can only be lost if the position falls to the liquidation line; the two gates and the guard exist to prevent that, but the risk is not zero.",
+        "Tidak untuk membayar uang saku. MON dikunci sebagai jaminan di vault yang hanya bisa ditutup olehmu, dan uang saku diambil dari dolar yang dipinjam di atasnya. Seperti pinjaman berjaminan mana pun, MON baru bisa hilang kalau posisi jatuh sampai garis likuidasi; dua gerbang dan penjaga ada untuk mencegah itu, tapi risikonya tidak nol.",
+        "Not to pay allowances. Your MON is locked as collateral in a vault only you can close, and the allowance is paid from dollars borrowed against it. As with any collateralised loan, MON can only be lost if the position falls to the liquidation line; the two gates and the guard exist to prevent that, but the risk is not zero.",
       ),
     },
     {
-      q: t("Kenapa tidak jual sedikit BNB tiap bulan saja?", "Why not just sell a little BNB every month?"),
+      q: t("Kenapa tidak jual sedikit MON tiap bulan saja?", "Why not just sell a little MON every month?"),
       a: t(
-        "Untuk banyak orang, menjual memang lebih sederhana. Cermin Saku untuk pemegang BNB jangka panjang yang ingin tetap memegang BNB tapi punya kebutuhan rutin. Gantinya adalah pinjaman, yang punya bunga dan risiko likuidasi. Hitungan kasarnya: meminjam baru lebih untung daripada menjual kalau BNB naik lebih cepat dari sekitar empat kali bunga pinjamannya. Bedanya dengan pinjaman biasa: uang saku tidak akan diam-diam memakai dana yang melindungi BNB-mu.",
-        "For many people, selling is simpler. Cermin Saku is for long-term BNB holders who want to keep their BNB but have a recurring need. The trade is a loan, with interest and liquidation risk. Roughly: borrowing only beats selling if BNB rises faster than about four times the borrow rate. The difference from a plain loan: the allowance can never quietly spend the money that protects your BNB.",
+        "Untuk banyak orang, menjual memang lebih sederhana. Cermin Saku untuk pemegang MON jangka panjang yang ingin tetap memegang MON tapi punya kebutuhan rutin. Gantinya adalah pinjaman, yang punya bunga dan risiko likuidasi. Hitungan kasarnya: meminjam baru lebih untung daripada menjual kalau MON naik lebih cepat dari sekitar empat kali bunga pinjamannya. Bedanya dengan pinjaman biasa: uang saku tidak akan diam-diam memakai dana yang melindungi MON-mu.",
+        "For many people, selling is simpler. Cermin Saku is for long-term MON holders who want to keep their MON but have a recurring need. The trade is a loan, with interest and liquidation risk. Roughly: borrowing only beats selling if MON rises faster than about four times the borrow rate. The difference from a plain loan: the allowance can never quietly spend the money that protects your MON.",
       ),
     },
     {
       q: t("Kalau uang saku ditahan, anakku bagaimana?", "If an allowance is held, what about my child?"),
       a: t(
-        "Amplop yang ditahan tidak hilang: tetap terutang dan dibayar begitu posisi aman lagi, oleh penjaga (keeper) atau siapa pun yang memicu pembayaran. Di dasbor kamu langsung melihatnya dan bisa menambah BNB supaya aman lebih cepat. Untuk kebutuhan pokok seperti kos dan makan, jangan bergantung pada satu aset yang naik-turun; Cermin Saku paling pas sebagai uang saku di atas itu.",
-        "A held envelope is not lost: it stays owed and is paid once the position is safe again, by the keeper or anyone who triggers the payment. You see it on the dashboard and can add BNB to make it safe sooner. For essentials such as rent and food, do not depend on a single volatile asset; Cermin Saku fits best as the allowance on top of that.",
+        "Amplop yang ditahan tidak hilang: tetap terutang dan dibayar begitu posisi aman lagi, oleh penjaga (keeper) atau siapa pun yang memicu pembayaran. Di dasbor kamu langsung melihatnya dan bisa menambah MON supaya aman lebih cepat. Untuk kebutuhan pokok seperti kos dan makan, jangan bergantung pada satu aset yang naik-turun; Cermin Saku paling pas sebagai uang saku di atas itu.",
+        "A held envelope is not lost: it stays owed and is paid once the position is safe again, by the keeper or anyone who triggers the payment. You see it on the dashboard and can add MON to make it safe sooner. For essentials such as rent and food, do not depend on a single volatile asset; Cermin Saku fits best as the allowance on top of that.",
       ),
     },
     {
-      q: t("Apa yang terjadi kalau BNB anjlok?", "What happens if BNB crashes?"),
+      q: t("Apa yang terjadi kalau MON anjlok?", "What happens if MON crashes?"),
       a: t(
         "Pembayaran berikutnya diperiksa kontrak lebih dulu. Kalau posisi terlalu dekat zona bahaya, uang saku ditahan dan penjaga membela vault memakai tabungan cadangan, jauh sebelum garis likuidasi 110%. Begitu aman, amplop yang tertunda dibayar.",
         "The next payment is checked by the contract first. If the position is too close to danger, the allowance is held and the guard defends the vault from the savings reserve, well before the 110% liquidation line. Once it is safe, the owed envelopes are paid.",
@@ -64,8 +64,8 @@ export function FAQ() {
     {
       q: t("Sudah bisa dipakai dengan uang sungguhan?", "Can I use it with real money yet?"),
       a: t(
-        "Belum. Saat ini berjalan di BNB Chain testnet dengan dolar dan harga BNB tiruan, untuk uji coba. Versi mainnet butuh mitra pinjaman di BNB Chain dan penukaran ke Rupiah.",
-        "Not yet. It runs on BNB Chain testnet with test dollars and a simulated BNB price. Mainnet needs a lending partner on BNB Chain and a Rupiah off-ramp.",
+        "Belum. Saat ini berjalan di Monad testnet dengan dolar dan harga MON tiruan, untuk uji coba. Versi mainnet butuh mitra pinjaman di Monad dan penukaran ke Rupiah.",
+        "Not yet. It runs on Monad testnet with test dollars and a simulated MON price. Mainnet needs a lending partner on Monad and a Rupiah off-ramp.",
       ),
     },
   ];

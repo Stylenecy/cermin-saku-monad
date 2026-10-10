@@ -33,7 +33,7 @@ export function Rp({
   );
 }
 
-/** BNB/USD (1e18) price as Rupiah per BNB. */
+/** MON/USD (1e18) price as Rupiah per MON. */
 export function RpPrice({ price, className }: { price: bigint | undefined; className?: string }) {
   const { rate } = useUsdIdr();
   if (!price) return <span className={cn("text-muted", className)}>—</span>;

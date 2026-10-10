@@ -20,6 +20,15 @@ function when(ts: number | undefined, lang: "id" | "en") {
   });
 }
 
+/** How long after its due time a payment landed, from the passbook's own two timestamps. */
+function lateness(sec: number, t: (id: string, en: string) => string) {
+  if (sec <= 1) return t("tepat waktu", "on time");
+  if (sec < 120) return t(`${sec} dtk sesudah jatuh tempo`, `${sec} s after due`);
+  const min = Math.round(sec / 60);
+  if (min < 120) return t(`${min} mnt sesudah jatuh tempo`, `${min} min after due`);
+  return t(`${Math.round(min / 60)} jam sesudah jatuh tempo`, `${Math.round(min / 60)} h after due`);
+}
+
 function Row({ e }: { e: LedgerEntry }) {
   const { t, lang } = useLang();
   let tag: React.ReactNode;
@@ -42,7 +51,7 @@ function Row({ e }: { e: LedgerEntry }) {
           <span className="text-ink">{lang === "id" ? STATUS_TEXT[s].id : STATUS_TEXT[s].en}</span>
           <span className="text-muted">
             {" "}
-            · ICR {formatBps(e.icrBps, lang, 1)} · BNB <RpPrice price={e.price} />
+            · ICR {formatBps(e.icrBps, lang, 1)} · MON <RpPrice price={e.price} />
           </span>
         </>
       );
@@ -64,7 +73,7 @@ function Row({ e }: { e: LedgerEntry }) {
       tag = <span className="rounded-md bg-tinta px-2 py-0.5 text-xs font-bold text-white">SKIM</span>;
       body = (
         <>
-          {t("BNB naik, Shadow bertambah", "BNB rose, Shadow grew")} <Rp wei={e.amount} sign="+" showUsd={false} />
+          {t("MON naik, Shadow bertambah", "MON rose, Shadow grew")} <Rp wei={e.amount} sign="+" showUsd={false} />
         </>
       );
       break;
@@ -86,19 +95,25 @@ function Row({ e }: { e: LedgerEntry }) {
       <span className="col-span-2 font-mono text-xs text-muted tabular sm:col-span-1">{when(e.timestamp, lang)}</span>
       <span className="self-start sm:self-center">{tag}</span>
       <span className="min-w-0 text-sm leading-relaxed">{body}</span>
-      <a
-        href={`${EXPLORER_URL}/tx/${e.txHash}`}
-        target="_blank"
-        rel="noreferrer"
-        className="col-span-2 font-mono text-xs text-tinta underline-offset-2 hover:underline sm:col-span-1"
-      >
-        {e.txHash.slice(0, 10)}…
-      </a>
+      {e.txHash ? (
+        <a
+          href={`${EXPLORER_URL}/tx/${e.txHash}`}
+          target="_blank"
+          rel="noreferrer"
+          className="col-span-2 font-mono text-xs text-tinta underline-offset-2 hover:underline sm:col-span-1"
+        >
+          {e.txHash.slice(0, 10)}…
+        </a>
+      ) : e.kind === "paid" && e.timestamp !== undefined && e.dueAt !== undefined ? (
+        <span className="col-span-2 text-xs text-muted tabular sm:col-span-1">{lateness(e.timestamp - e.dueAt, t)}</span>
+      ) : (
+        <span className="hidden sm:block" />
+      )}
     </li>
   );
 }
 
-/** The passbook: every payment, hold, defend and skim, newest first, from event logs. */
+/** The passbook: every payment and hold from contract state, plus recent defends and skims, newest first. */
 const KEY_KINDS: LedgerEntry["kind"][] = ["held", "defended", "created", "cancelled"];
 
 export function Ledger({
@@ -141,13 +156,13 @@ export function Ledger({
             ))}
           </div>
         ) : (
-          <span className="text-xs text-muted">{t("dari event log, tanpa indexer", "from event logs, no indexer")}</span>
+          <span className="text-xs text-muted">{t("dibaca dari kontrak, tanpa indexer", "read from the contract, no indexer")}</span>
         )}
       </div>
-      {isLoading && <p className="mt-4 text-sm text-muted">{t("Membaca event dari BNB Chain…", "Reading events from BNB Chain…")}</p>}
+      {isLoading && <p className="mt-4 text-sm text-muted">{t("Membaca buku catatan dari Monad…", "Reading the passbook from Monad…")}</p>}
       {isError && (
         <p className="mt-4 text-sm text-stempel">
-          {t("Gagal membaca log dari RPC.", "Could not read logs from the RPC.")}{" "}
+          {t("Gagal membaca dari RPC.", "Could not read from the RPC.")}{" "}
           <button type="button" onClick={() => refetch()} className="underline">
             {t("Coba lagi", "Retry")}
           </button>
@@ -159,7 +174,7 @@ export function Ledger({
       {data && data.length > 0 && (
         <ol className="mt-3">
           {data.slice(0, all ? data.length : limit).map((e) => (
-            <Row key={`${e.txHash}-${e.logIndex}`} e={e} />
+            <Row key={e.key} e={e} />
           ))}
         </ol>
       )}

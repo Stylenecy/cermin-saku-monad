@@ -43,7 +43,7 @@ export function CTA({
                 <em className="italic font-normal text-amber-200">{t("dalam satu menit.", "in a minute.")}</em>
               </h2>
               <p className="text-white/85 mt-5 max-w-xl mx-auto leading-relaxed">
-                {t("Masuk dengan Google atau dompet, setor BNB, atur jadwal. BNB-mu tetap utuh.", "Sign in with Google or a wallet, deposit BNB, set a schedule. Your BNB stays whole.")}
+                {t("Masuk dengan Google atau dompet, setor MON, atur jadwal. MON-mu tetap utuh.", "Sign in with Google or a wallet, deposit MON, set a schedule. Your MON stays whole.")}
               </p>
               <div className="mt-8 flex flex-col items-center gap-4">
                 {launchHref && onLaunch ? (

@@ -4,7 +4,7 @@ import { useLang } from "@/lib/i18n";
 import { Envelope, type EnvelopeState } from "./Envelope";
 
 /**
- * Mechanism illustration for the hero (labelled as an illustration): a BNB
+ * Mechanism illustration for the hero (labelled as an illustration): a MON
  * price line over eight scheduled envelopes. Where the price sits under the
  * Saku line, the envelope is stamped DITAHAN; once the price recovers, the
  * held envelopes are paid. The real, on-chain version lives on /bukti.
@@ -24,7 +24,7 @@ export function EnvelopeTimeline() {
 
   return (
     <figure className="rounded-3xl border border-cream-300 bg-surface shadow-soft p-4 sm:p-6">
-      <svg viewBox={`0 0 ${w} ${h}`} className="w-full" role="img" aria-label={t("Ilustrasi: harga BNB turun di bawah garis saku, dua amplop ditahan, lalu dibayar setelah pulih", "Illustration: BNB price dips under the Saku line, two envelopes are held, then paid after recovery")}>
+      <svg viewBox={`0 0 ${w} ${h}`} className="w-full" role="img" aria-label={t("Ilustrasi: harga MON turun di bawah garis saku, dua amplop ditahan, lalu dibayar setelah pulih", "Illustration: MON price dips under the Saku line, two envelopes are held, then paid after recovery")}>
         <line x1="20" x2={w - 10} y1={y(SAKU_LINE)} y2={y(SAKU_LINE)} className="stroke-tinta" strokeWidth="1.5" strokeDasharray="6 5" />
         <text x={w - 12} y={y(SAKU_LINE) - 6} textAnchor="end" className="fill-tinta text-[11px] font-semibold">
           {t("garis saku", "saku line")}
@@ -34,7 +34,7 @@ export function EnvelopeTimeline() {
           <circle key={i} cx={x(i)} cy={y(p)} r="4" className={p < SAKU_LINE ? "fill-stempel" : "fill-ink"} />
         ))}
         <text x="20" y="14" className="fill-muted text-[11px]">
-          {t("harga BNB", "BNB price")}
+          {t("harga MON", "MON price")}
         </text>
       </svg>
       <div className="relative mt-2">

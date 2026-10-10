@@ -73,7 +73,7 @@ export function StrategyCard({ params, btcPriceUsd, lastSkimPrice, createdAt }: 
           <Row label="Target LTV" value={`${targetLtv.toFixed(0)}%`} />
           <Row label={t("Bela di bawah", "Defend below")} value={`${defendIcr.toFixed(0)}%`} tone="text-warning" />
           <Row label={t("Darurat di bawah", "Emergency below")} value={`${emergencyIcr.toFixed(0)}%`} tone="text-danger" />
-          <Row label={t("Skim saat BNB naik", "Skim on BNB rise")} value={`+${skim.toFixed(1)}%`} />
+          <Row label={t("Skim saat MON naik", "Skim on MON rise")} value={`+${skim.toFixed(1)}%`} />
         </div>
 
         {/* allocation + skim */}

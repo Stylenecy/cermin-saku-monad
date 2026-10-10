@@ -117,8 +117,8 @@ export function SakuFooter() {
   return (
     <footer className="mx-auto max-w-6xl px-6 pt-16 pb-24 md:pb-10 text-xs text-muted-2">
       {t(
-        "BNB Chain testnet · dolar (MUSD) dan harga BNB tiruan untuk uji coba · bukan nasihat keuangan",
-        "BNB Chain testnet · test dollars (MUSD) and a simulated BNB price · not financial advice",
+        "Monad testnet · dolar (MUSD) dan harga MON tiruan untuk uji coba · bukan nasihat keuangan",
+        "Monad testnet · test dollars (MUSD) and a simulated MON price · not financial advice",
       )}
     </footer>
   );

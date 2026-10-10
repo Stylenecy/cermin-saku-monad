@@ -79,7 +79,7 @@ function PrivyAccountButton({ label }: { label?: string }) {
   if (address && chainId !== activeChain.id) {
     return (
       <Button variant="danger" size="sm" onClick={() => switchChain({ chainId: activeChain.id })}>
-        {t("Ganti ke BNB testnet", "Switch to BNB testnet")}
+        {t("Ganti ke Monad testnet", "Switch to Monad testnet")}
       </Button>
     );
   }

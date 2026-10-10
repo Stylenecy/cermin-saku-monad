@@ -74,7 +74,7 @@ export function VaultHero({
       <div className="absolute -top-16 -right-4 w-60 h-60 rounded-full bg-amber-500/20 blur-3xl pointer-events-none" />
 
       <div className="relative grid grid-cols-1 lg:grid-cols-[1.35fr_1fr] gap-8 items-center [&>*]:min-w-0">
-        {/* left — the Shadow (what you live on), cast from BNB held whole */}
+        {/* left — the Shadow (what you live on), cast from MON held whole */}
         <div>
           <div className="flex flex-wrap items-center gap-2.5 mb-5">
             <span className="text-[10px] uppercase tracking-[0.2em] text-amber-300/80 font-mono">Vault</span>
@@ -89,7 +89,7 @@ export function VaultHero({
             </a>
             <span className="w-px h-3 bg-white/15" />
             <span className="inline-flex items-center gap-1.5 text-xs font-mono tabular-nums text-white/55">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" /> BNB {formatIdr(btcPriceUsd * rate)}
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" /> MON {formatIdr(btcPriceUsd * rate)}
               <span className="text-[0.85em]">
                 ({formatUsd(btcPriceUsd, 0)}) · {t("harga simulasi", "simulated price")}
               </span>
@@ -112,7 +112,7 @@ export function VaultHero({
             </span>{" "}
             ·{" "}
             {t("dipinjam dari", "borrowed against")}{" "}
-            <span className="text-cream-100 tabular-nums">{formatNum(btcAmount, lang, 4)} BNB</span>{" "}
+            <span className="text-cream-100 tabular-nums">{formatNum(btcAmount, lang, 4)} MON</span>{" "}
             {t("yang tetap utuh", "held whole")}
           </p>
           <p className="text-xs text-white/40 mt-1.5 tabular-nums">
@@ -143,7 +143,7 @@ export function VaultHero({
                 value={liqPrice > 0 ? formatIdr(liqPrice * rate) : "—"}
                 sub={liqPrice > 0 ? formatUsd(liqPrice, 0) : undefined}
               />
-              <Stat label={t("Ruang turun BNB", "BNB drop buffer")} value={`${dropBuffer.toFixed(0)}%`} accent="text-success" />
+              <Stat label={t("Ruang turun MON", "MON drop buffer")} value={`${dropBuffer.toFixed(0)}%`} accent="text-success" />
             </div>
             {onDefend && (
               needsDefense ? (

@@ -25,16 +25,16 @@ const fraunces = Fraunces({
   display: "swap",
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://cermin-saku.vercel.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://cermin-saku-monad.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "Cermin Saku — uang saku dari BNB-mu yang tahu kapan menahan diri",
+  title: "Cermin Saku — uang saku dari MON-mu yang tahu kapan menahan diri",
   description:
-    "Kirim uang saku bulanan ke anak dari vault BNB di BNB Chain. BNB-mu tetap utuh, dan kontraknya menahan pembayaran sendiri saat pasar sedang jatuh.",
+    "Kirim uang saku bulanan ke anak dari vault MON di Monad. MON-mu tetap utuh, dan kontraknya menahan pembayaran sendiri saat pasar sedang jatuh.",
   openGraph: {
     title: "Cermin Saku",
-    description: "Uang saku terjadwal dari BNB-mu. Kontraknya menahan pembayaran sendiri saat posisi tidak aman.",
+    description: "Uang saku terjadwal dari MON-mu. Kontraknya menahan pembayaran sendiri saat posisi tidak aman.",
     type: "website",
   },
 };

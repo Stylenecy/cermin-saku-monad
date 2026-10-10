@@ -1,5 +1,5 @@
-// BNB Chain addresses come from contracts/script/Deploy.s.sol output via
-// NEXT_PUBLIC_* env vars. TODO: fill after deploying to BSC testnet — the
+// Monad addresses come from contracts/script/Deploy.s.sol output via
+// NEXT_PUBLIC_* env vars. TODO: fill after deploying to Monad testnet — the
 // zero-address fallbacks mean "not deployed yet".
 export const CONTRACTS = {
   CERMIN_FACTORY: (process.env.NEXT_PUBLIC_CERMIN_FACTORY_ADDRESS ||
