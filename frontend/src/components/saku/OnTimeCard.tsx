@@ -33,7 +33,7 @@ export function OnTimeCard({ vault }: { vault: `0x${string}` | undefined }) {
       </div>
       <h2 id="ontime-title" className="mt-2 font-serif text-2xl font-medium tracking-[-0.02em] text-ink">
         {t("Amplop datang ", "Envelopes arrive ")}
-        <em className="italic font-normal text-amber-600">{t("di detik jatuh temponya", "the second they fall due")}</em>
+        <em className="italic font-normal text-amber-600">{t("hitungan detik setelah jatuh tempo", "within seconds of falling due")}</em>
       </h2>
       <dl className="mt-6 grid gap-4 sm:grid-cols-3">
         {stats.map((s) => (

@@ -7,7 +7,7 @@ export function TrustStrip() {
   const items = [
     t("Monad · testnet", "Monad · testnet"),
     t("MON tidak dijual untuk uang saku", "No MON sold for allowances"),
-    t("Dibayar di detik jatuh tempo", "Paid the second it falls due"),
+    t("Dibayar detik-detik setelah jatuh tempo", "Paid seconds after falling due"),
     t("Ditahan otomatis saat bahaya", "Held automatically when unsafe"),
     t("Kontrak terverifikasi", "Verified contracts"),
     t("Tanpa kustodian", "Non-custodial"),

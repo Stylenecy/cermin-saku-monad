@@ -2,8 +2,8 @@
 
 # Cermin Saku on Monad
 
-**An allowance that arrives the second it is due, and holds back when it is not safe.**
-*Uang saku yang datang tepat di detik jatuh temponya, dan menahan diri saat posisi tidak aman.*
+**An allowance that arrives within seconds of falling due, and holds back when it is not safe.**
+*Uang saku yang datang hitungan detik setelah jatuh tempo, dan menahan diri saat posisi tidak aman.*
 
 Scheduled allowances paid from a MON-backed vault on Monad. The vault contract itself refuses a payment
 when the position is not safe and pays it once it is, and on Monad each payment lands within seconds of
@@ -32,29 +32,29 @@ drain exactly the money the position needs to avoid liquidation. And for the chi
 1. **Survival money comes first.** Before every payment the vault checks, at the live price, that the position is
    healthy *and* would survive another 30% fall. If not, the envelope is held (no money moves, it stays owed) and
    paid once the position is safe again. The vault enforces this, not the app.
-2. **On time means on time.** On Monad the keeper wakes at the due second and the payment lands in the first blocks
-   where it is allowed. The contract records both the due time and the paying block's time, so punctuality is
+2. **On time means on time.** On Monad the keeper wakes at the due time and the payment lands within seconds, in the
+   first blocks where it is allowed. The contract records both the due time and the paying block's time, so punctuality is
    something you can read from chain state, not a claim.
 
 ## What is new for Monad (built 10–12 Oct 2026)
 
 | | What | Why it matters on Monad |
 |---|---|---|
-| **Passbook in contract state** | Every `release()`, paid or held, writes one line to `CerminSaku`'s passbook: when it ran, when that period was due, payment number or hold reason, ICR, amount, price. `passbook(id, offset, limit)` returns the history in one call. | Monad's public RPC serves `eth_getLogs` 100 blocks (~40 s) at a time. Rebuilding weeks of history from events would take tens of thousands of calls; the app now needs one per schedule and no indexer. |
+| **Passbook in contract state** | Every `release()`, paid or held, writes one line to `CerminSaku`'s passbook: when it ran, when that period was due, payment number or hold reason, ICR, amount, price. `passbook(id, offset, limit)` returns the history in one call. | Monad's public RPC (`testnet-rpc.monad.xyz`) answers `eth_getLogs` for at most 100 blocks (~40 s) per call ("eth_getLogs is limited to a 100 range"; other free RPCs we tried cap at 1,000–10,000). Rebuilding weeks of history from events would take tens of thousands of calls; the app now needs one per schedule and no indexer. |
 | **On-time keeper** | The keeper sleeps until the next envelope falls due *on the chain's clock*, then releases it, instead of polling every few minutes. | With ~0.4 s blocks, "due at 09:00:00" can mean paid at 09:00:01. The passbook shows the gap for every payment. |
-| **Receipts in one round trip** | The keeper sends through `eth_sendRawTransactionSync`, which returns the receipt once the block is in, and logs the measured time; it falls back to send + poll elsewhere. | The keeper knows "paid" or "held" in about a block time. |
-| **Measured, not claimed** | In the app, after the parent signs, a badge shows how long the transaction took to land in a Monad block, timed in the browser. The app polls receipts every 150 ms instead of every 4 s. | The parent's first five minutes feel instant because they are, and the number on screen is the one we measured. |
+| **Receipts in one round trip** | The keeper sends through `eth_sendRawTransactionSync`, which returns the receipt once the block is in, and logs the measured time; it falls back to send + poll elsewhere. | The keeper learns "paid" or "held" from one call instead of polling; measured times are in [`docs/MONAD-DEPLOY.md`](docs/MONAD-DEPLOY.md). |
+| **Measured, not claimed** | In the app, after the parent signs, a badge shows how long the transaction took to land in a Monad block, timed in the browser. The app polls receipts every 150 ms instead of every 4 s. | Whatever the number is, the parent sees the real one, not a promise. |
 | **"Tepat waktu di Monad" card** | `/demo` shows payments recorded, the median seconds from due time to paying block, and how many landed within 2 s, all computed from the passbook. | Judges can check punctuality without trusting us. |
-| **Monad deployment** | 9 contracts on Monad testnet, the simulated price seeded from Pyth MON/USD, sized for faucet MON, gas limits padded 10% not 30% (Monad charges the gas limit). | — |
+| **Monad deployment** | One-command deploy of the 9 contracts to Monad testnet ([Contracts](#contracts)), the simulated price seeded from Pyth MON/USD, sized for faucet MON, gas limits padded 10% not 30% (Monad charges the gas limit). | — |
 
 ## Provenance: who built what, and when
 
-This project has three layers. Everything we show for Monad Metropolis was built inside the six-week window
-(1 Sep – 13 Oct 2026); the foundation underneath it was not, and is open source.
+This project has three layers. Everything we claim as ours was built inside the six-week window (1 Sep – 13 Oct
+2026) by Dex Bennett (GitHub: Stylenecy); the foundation underneath it is someone else's open-source work.
 
 | Layer | When | Who | What |
 |---|---|---|---|
-| **Cermin** (foundation) | May 2026, before the window | Yeheskiel Yunus Tame, MIT ([original repo](https://github.com/yeheskieltame/Cermin)) | the vault engine (`CerminVault`, `CerminFactory`), the skim/defend keeper, the mock Liquity-style CDP, the web app's base design and watercolour illustrations. Commit [`e767fde`](https://github.com/Stylenecy/cermin-saku-monad/commit/e767fde) is that code, unchanged. |
+| **Cermin** (foundation, not ours) | written May 2026 for Mezo; ported to BNB Chain by its author in late Sep 2026 | Yeheskiel Yunus Tame, MIT ([original repo](https://github.com/yeheskieltame/Cermin)) | the vault engine (`CerminVault`, `CerminFactory`), the skim/defend keeper, the mock Liquity-style CDP, the web app's base design and watercolour illustrations. Commit [`e767fde`](https://github.com/Stylenecy/cermin-saku-monad/commit/e767fde) imports that BNB port unchanged (from `bcc-ukdw/seed-bnb@52671ce`; a few Mezo marketing files left out). |
 | **Cermin Saku** | 5–7 Oct 2026 | Dex Bennett | `CerminSaku` (schedules, permissionless `release`, holds), the spend allowance and two safety gates in `CerminVault` v1.1, `CerminLens`, the keeper's allowance payer, 45 tests, the Bahasa Indonesia + Rupiah product with Google sign-in. Built for BNB Chain and submitted to the Indonesia Web3 Hackathon 2026; that version stays at [Stylenecy/cermin-saku](https://github.com/Stylenecy/cermin-saku). |
 | **Cermin Saku on Monad** | 10–12 Oct 2026 | Dex Bennett | everything in the table above: passbook in state (+7 tests), on-time keeper with sync receipts (+3 tests), measured confirmation in the app, the punctuality card, Monad deployment and MON product copy. |
 
@@ -79,7 +79,7 @@ Details: [`docs/THREAT-MODEL.md`](docs/THREAT-MODEL.md).
 
 | What | Evidence | How to check |
 |---|---|---|
-| Contracts tested | **85 forge tests passing**: 33 original Cermin + 28 Saku unit/fuzz + 7 passbook (incl. fuzz) + 2 crash-reserve stress + 7 Lens + 8 in the invariant suite (7 invariants + 1 positive control) | `cd contracts && forge test` |
+| Contracts tested | **85 forge tests passing** (the original suites still say "BNB" in names and comments; they come from the BNB Chain version): 33 original Cermin + 28 Saku unit/fuzz + 7 passbook (incl. fuzz) + 2 crash-reserve stress + 7 Lens + 8 in the invariant suite (7 invariants + 1 positive control) | `cd contracts && forge test` |
 | Passbook matches reality | fuzz `testFuzz_Passbook_MatchesPaidCounter`: random price paths, one line per release, payment numbers match the paid counter, never recorded before due | [`SakuPassbook.t.sol`](contracts/test/saku/SakuPassbook.t.sol) |
 | Payment never made while unsafe | invariant `invariant_NoUnsafePayment` + fuzz `testFuzz_NeverPaysBelowFloor` | [`test/saku/`](contracts/test/saku) |
 | Paying never eats the defense | fuzz `testFuzz_PaidAllowanceLeavesEnoughToDefendAfterStress` | [`SakuStress.t.sol`](contracts/test/saku/SakuStress.t.sol) |

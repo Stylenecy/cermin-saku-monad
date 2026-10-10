@@ -98,8 +98,8 @@ export function Hero({
           className="mt-5 text-sm sm:text-base md:text-lg text-muted max-w-2xl mx-auto text-pretty leading-relaxed"
         >
           {t(
-            "Setor MON sekali. Cermin Saku meminjam dolar di atasnya dan mengirim uang saku ke dompet anakmu tepat di detik jatuh temponya, di Monad. Saat MON jatuh terlalu dalam, kontraknya sendiri menahan pembayaran sampai aman lagi.",
-            "Deposit MON once. Cermin Saku borrows dollars against it and sends your child's allowance the second it falls due, on Monad. When MON falls too far, the contract itself holds the payment until it is safe again.",
+            "Setor MON sekali. Cermin Saku meminjam dolar di atasnya dan mengirim uang saku ke dompet anakmu hitungan detik setelah jatuh tempo, di Monad. Saat MON jatuh terlalu dalam, kontraknya sendiri menahan pembayaran sampai aman lagi.",
+            "Deposit MON once. Cermin Saku borrows dollars against it and sends your child's allowance within seconds of falling due, on Monad. When MON falls too far, the contract itself holds the payment until it is safe again.",
           )}
         </motion.p>
 

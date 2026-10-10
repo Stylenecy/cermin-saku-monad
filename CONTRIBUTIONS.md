@@ -2,7 +2,7 @@
 
 This repository starts from **Cermin** by Yeheskiel Yunus Tame, MIT
 ([original](https://github.com/yeheskieltame/Cermin), Mezo Hackathon 2, May 2026; BNB Chain port by its author, late September 2026).
-Commit [`e767fde`](https://github.com/Stylenecy/cermin-saku/commit/e767fde) is the original published code, unchanged
+Commit [`e767fde`](https://github.com/Stylenecy/cermin-saku-monad/commit/e767fde) is the original published code, unchanged
 (source: `bcc-ukdw/seed-bnb` at `52671ce`, folder `Cermin/`; the Mezo pitch deck, Mezo logo files, a blog copy and
 three Mezo-era screenshots were left out of the import).
 
