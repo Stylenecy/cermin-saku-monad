@@ -1,5 +1,5 @@
 // Verify every contract of a deployment on Sourcify (no API key needed).
-//   cd contracts && forge build && node script/verify-sourcify.mjs deployments/bsc-testnet.json
+//   cd contracts && forge build && node script/verify-sourcify.mjs deployments/monad-testnet.json
 // Uses Sourcify API v2: POST /v2/verify/metadata/{chainId}/{address} with the
 // compiler metadata from Foundry's artifacts and the exact source files.
 import { readFileSync } from 'node:fs';
@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SOURCIFY = process.env.SOURCIFY_URL ?? 'https://sourcify.dev/server';
-const dep = JSON.parse(readFileSync(join(root, process.argv[2] ?? 'deployments/bsc-testnet.json'), 'utf8'));
+const dep = JSON.parse(readFileSync(join(root, process.argv[2] ?? 'deployments/monad-testnet.json'), 'utf8'));
 
 const ARTIFACTS = {
   CerminFactory: 'CerminFactory.sol/CerminFactory.json',

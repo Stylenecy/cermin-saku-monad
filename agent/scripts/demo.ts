@@ -6,7 +6,7 @@
  *
  *   open      --mon 10 [--preset balanced]        parent opens a vault
  *   grant     --musd 20                            allow Saku to spend up to N MUSD
- *   schedule  --to 0x.. --musd 1.5 --period 600 --count 12 [--label "Uang saku Rara"]
+ *   schedule  --to 0x.. --musd 1.5 --period 600 --count 12 [--label "Uang saku Rara"] [--start-in 120]
  *   price     --usd 0.02                           move the SIMULATED price (MockPriceFeed owner)
  *   status                                         print vault, lines and schedules
  *
@@ -123,6 +123,9 @@ async function main() {
   } else if (cmd === 'schedule') {
     const { account, client } = wallet('PARENT_PRIVATE_KEY');
     const label = flag('label', 'Uang saku');
+    // --start-in N: first payment due N seconds from the latest block (0 = due now)
+    const startIn = BigInt(flag('start-in', '0'));
+    const firstAt = startIn > 0n ? (await pub.getBlock()).timestamp + startIn : 0n;
     await send('create schedule', () =>
       client.writeContract({
         address: dep.CerminSaku,
@@ -133,7 +136,7 @@ async function main() {
           parseEther(flag('musd')),
           BigInt(flag('period', '600')),
           Number(flag('count', '12')),
-          0n,
+          firstAt,
           stringToHex(label, { size: 32 }),
         ],
         chain,

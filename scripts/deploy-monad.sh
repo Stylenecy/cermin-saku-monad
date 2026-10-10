@@ -66,7 +66,7 @@ if ! npx tsx scripts/demo.ts status >/dev/null 2>&1; then
   spend=$(python -c "print(float('$demo_mon') * int('$price')/1e18 * 0.5 * 0.5)")
   per=$(python -c "print(f'{$spend/16:.6f}')")
   npx tsx scripts/demo.ts grant --musd "$(python -c "print(f'{$spend:.6f}')")"
-  npx tsx scripts/demo.ts schedule --to "$CHILD_ADDRESS" --musd "${DEMO_MUSD:-$per}" --period "${DEMO_PERIOD:-60}" --count 12 --label "Uang saku Rara"
+  npx tsx scripts/demo.ts schedule --to "$CHILD_ADDRESS" --musd "${DEMO_MUSD:-$per}" --period "${DEMO_PERIOD:-60}" --count "${DEMO_COUNT:-12}" --start-in "${DEMO_START_IN:-180}" --label "Uang saku Rara"
 fi
 npx tsx scripts/demo.ts status
 
